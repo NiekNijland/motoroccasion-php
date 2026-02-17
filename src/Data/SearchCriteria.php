@@ -27,6 +27,7 @@ readonly class SearchCriteria
         public ?int $radius = null,
         public ?string $keywords = null,
         public ?string $selection = null,
+        public ?SortOrder $sortOrder = null,
         public int $page = 1,
         public int $perPage = 50,
     ) {

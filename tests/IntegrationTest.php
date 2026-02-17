@@ -13,6 +13,7 @@ use NiekNijland\MotorOccasion\Data\Result;
 use NiekNijland\MotorOccasion\Data\SearchCriteria;
 use NiekNijland\MotorOccasion\Data\SearchResult;
 use NiekNijland\MotorOccasion\Data\Seller;
+use NiekNijland\MotorOccasion\Data\SortOrder;
 use NiekNijland\MotorOccasion\Data\Type;
 use NiekNijland\MotorOccasion\MotorOccasion;
 use PHPUnit\Framework\TestCase;
@@ -49,6 +50,10 @@ class IntegrationTest extends TestCase
 
     private static ?Brand $bmwBrand = null;
 
+    private static ?SearchResult $sortedByPriceResult = null;
+
+    private static ?SearchResult $sortedByYearDescResult = null;
+
     public static function setUpBeforeClass(): void
     {
         // 1. Fetch brands and categories (shared session)
@@ -82,6 +87,23 @@ class IntegrationTest extends TestCase
         // 5. Offers (separate endpoint, not affected by search rate-limiting)
         $offersClient = new MotorOccasion();
         self::$offersResult = $offersClient->getOffers(perPage: 10);
+
+        // 6. Sorted searches (verify sort order params work against live site)
+        if (self::$bmwBrand instanceof Brand) {
+            $sortedPriceClient = new MotorOccasion();
+            self::$sortedByPriceResult = $sortedPriceClient->search(new SearchCriteria(
+                brand: self::$bmwBrand,
+                sortOrder: SortOrder::PriceAscending,
+                perPage: 10,
+            ));
+
+            $sortedYearClient = new MotorOccasion();
+            self::$sortedByYearDescResult = $sortedYearClient->search(new SearchCriteria(
+                brand: self::$bmwBrand,
+                sortOrder: SortOrder::YearDescending,
+                perPage: 10,
+            ));
+        }
     }
 
     public static function tearDownAfterClass(): void
@@ -93,6 +115,8 @@ class IntegrationTest extends TestCase
         self::$offersResult = null;
         self::$detail = null;
         self::$bmwBrand = null;
+        self::$sortedByPriceResult = null;
+        self::$sortedByYearDescResult = null;
     }
 
     // --- Brands ---
@@ -309,6 +333,56 @@ class IntegrationTest extends TestCase
 
         $this->assertGreaterThan(0, self::$detail->price, 'Detail price should be > 0');
         $this->assertGreaterThan(0, self::$detail->year, 'Detail year should be > 0');
+    }
+
+    // --- Sort order ---
+
+    public function test_search_with_price_ascending_sort_returns_results(): void
+    {
+        $this->assertNotNull(self::$sortedByPriceResult, 'Sorted search result was not fetched');
+        $this->assertInstanceOf(SearchResult::class, self::$sortedByPriceResult);
+        $this->assertNotEmpty(self::$sortedByPriceResult->results, 'Expected at least one result for price-sorted search');
+    }
+
+    public function test_search_with_price_ascending_sort_returns_ascending_prices(): void
+    {
+        $this->assertNotNull(self::$sortedByPriceResult);
+        $this->assertCount(10, self::$sortedByPriceResult->results, 'Expected 10 results');
+
+        $prices = array_map(fn (Result $r): int => $r->price, self::$sortedByPriceResult->results);
+        $counter = count($prices);
+
+        for ($i = 1; $i < $counter; $i++) {
+            $this->assertGreaterThanOrEqual(
+                $prices[$i - 1],
+                $prices[$i],
+                sprintf('Price at index %d (%d) should be >= price at index %d (%d) for ascending sort', $i, $prices[$i], $i - 1, $prices[$i - 1]),
+            );
+        }
+    }
+
+    public function test_search_with_year_descending_sort_returns_results(): void
+    {
+        $this->assertNotNull(self::$sortedByYearDescResult, 'Sorted search result was not fetched');
+        $this->assertInstanceOf(SearchResult::class, self::$sortedByYearDescResult);
+        $this->assertNotEmpty(self::$sortedByYearDescResult->results, 'Expected at least one result for year-sorted search');
+    }
+
+    public function test_search_with_year_descending_sort_returns_descending_years(): void
+    {
+        $this->assertNotNull(self::$sortedByYearDescResult);
+        $this->assertCount(10, self::$sortedByYearDescResult->results, 'Expected 10 results');
+
+        $years = array_map(fn (Result $r): int => $r->year, self::$sortedByYearDescResult->results);
+        $counter = count($years);
+
+        for ($i = 1; $i < $counter; $i++) {
+            $this->assertLessThanOrEqual(
+                $years[$i - 1],
+                $years[$i],
+                sprintf('Year at index %d (%d) should be <= year at index %d (%d) for descending sort', $i, $years[$i], $i - 1, $years[$i - 1]),
+            );
+        }
     }
 
     // --- DTO serialization round-trip with live data ---

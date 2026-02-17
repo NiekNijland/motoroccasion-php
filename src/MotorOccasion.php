@@ -18,6 +18,7 @@ use NiekNijland\MotorOccasion\Data\ListingDetail;
 use NiekNijland\MotorOccasion\Data\Result;
 use NiekNijland\MotorOccasion\Data\SearchCriteria;
 use NiekNijland\MotorOccasion\Data\SearchResult;
+use NiekNijland\MotorOccasion\Data\SortOrder;
 use NiekNijland\MotorOccasion\Data\Type;
 use NiekNijland\MotorOccasion\Exception\MotorOccasionException;
 use NiekNijland\MotorOccasion\Parser\HtmlParser;
@@ -129,7 +130,7 @@ class MotorOccasion implements MotorOccasionInterface
             'params[selectie]' => $criteria->selection ?? 'all',
             'params[a]' => 'check',
             'params[c]' => (string) $criteria->perPage,
-            'params[order]' => 'default',
+            'params[order]' => ($criteria->sortOrder ?? SortOrder::Default)->value,
             'params[layout]' => 'line',
             'params[every]' => '10,6',
             'params[nr]' => 'true',
@@ -185,14 +186,14 @@ class MotorOccasion implements MotorOccasionInterface
     /**
      * @throws MotorOccasionException
      */
-    public function getOffers(int $page = 1, int $perPage = 40): SearchResult
+    public function getOffers(int $page = 1, int $perPage = 40, ?SortOrder $sortOrder = null): SearchResult
     {
         $this->ensureSession();
 
         $offset = ($page - 1) * $perPage;
 
         $html = $this->fetchAjaxResults('/ms.php', [
-            'params[order]' => 'update',
+            'params[order]' => ($sortOrder ?? SortOrder::RecentlyUpdated)->value,
             'params[max]' => (string) $perPage,
             'params[layout]' => 'big',
             'params[every]' => '10,8',

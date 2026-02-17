@@ -10,6 +10,7 @@ use NiekNijland\MotorOccasion\Data\ListingDetail;
 use NiekNijland\MotorOccasion\Data\Result;
 use NiekNijland\MotorOccasion\Data\SearchCriteria;
 use NiekNijland\MotorOccasion\Data\SearchResult;
+use NiekNijland\MotorOccasion\Data\SortOrder;
 use NiekNijland\MotorOccasion\Data\Type;
 use NiekNijland\MotorOccasion\Exception\MotorOccasionException;
 use NiekNijland\MotorOccasion\MotorOccasionInterface;
@@ -177,9 +178,9 @@ class FakeMotorOccasion implements MotorOccasionInterface
     /**
      * @throws MotorOccasionException
      */
-    public function getOffers(int $page = 1, int $perPage = 40): SearchResult
+    public function getOffers(int $page = 1, int $perPage = 40, ?SortOrder $sortOrder = null): SearchResult
     {
-        $this->recordCall('getOffers', ['page' => $page, 'perPage' => $perPage]);
+        $this->recordCall('getOffers', ['page' => $page, 'perPage' => $perPage, 'sortOrder' => $sortOrder]);
         $this->throwIfConfigured();
 
         $offset = ($page - 1) * $perPage;

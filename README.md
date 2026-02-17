@@ -103,6 +103,18 @@ $results = $client->search(new SearchCriteria(
 $results = $client->search(new SearchCriteria(
     keywords: 'quickshifter',
 ));
+
+// Sort by price (low to high)
+$results = $client->search(new SearchCriteria(
+    brand: $yamaha,
+    sortOrder: SortOrder::PriceAscending,
+));
+
+// Sort by year (newest first)
+$results = $client->search(new SearchCriteria(
+    brand: $yamaha,
+    sortOrder: SortOrder::YearDescending,
+));
 ```
 
 All available `SearchCriteria` fields:
@@ -124,6 +136,7 @@ All available `SearchCriteria` fields:
 | `radius` | `?int` | Radius in km (used with `postalCode`) |
 | `keywords` | `?string` | Free-text search |
 | `selection` | `?string` | Selection filter |
+| `sortOrder` | `?SortOrder` | Sort order (default: relevance) |
 | `page` | `int` | Page number (default: 1) |
 | `perPage` | `int` | Results per page (default: 50, max: 50) |
 
@@ -213,6 +226,9 @@ echo $offers->results[0]->monthlyLease;  // 134 (EUR/month)
 // Paginate offers
 $page2 = $client->getOffers(page: 2);
 $page1 = $client->getOffers(page: 1, perPage: 20);
+
+// Sort offers by price (default: recently updated)
+$offers = $client->getOffers(sortOrder: SortOrder::PriceDescending);
 ```
 
 ### Province enum
@@ -265,6 +281,33 @@ LicenseCategory::B;   // "B"  - trikes/quads (car license)
 
 // Use in search criteria
 $results = $client->search(new SearchCriteria(license: LicenseCategory::A2));
+```
+
+### SortOrder enum
+
+Control the order of search results and offers with the `SortOrder` enum.
+
+```php
+use NiekNijland\MotorOccasion\Data\SortOrder;
+
+// Available cases
+SortOrder::Default;          // "default"   - relevance (search default)
+SortOrder::RecentlyUpdated;  // "update"    - most recently updated (offers default)
+SortOrder::BrandAscending;   // "merk-asc"  - brand + type A-Z
+SortOrder::BrandDescending;  // "merk-desc" - brand + type Z-A
+SortOrder::YearAscending;    // "bwjr-asc"  - year old to new
+SortOrder::YearDescending;   // "bwjr-desc" - year new to old
+SortOrder::PriceAscending;   // "pric-asc"  - price low to high
+SortOrder::PriceDescending;  // "pric-desc" - price high to low
+
+// Use in search
+$results = $client->search(new SearchCriteria(
+    brand: $yamaha,
+    sortOrder: SortOrder::PriceAscending,
+));
+
+// Use in offers
+$offers = $client->getOffers(sortOrder: SortOrder::YearDescending);
 ```
 
 ### Serialization

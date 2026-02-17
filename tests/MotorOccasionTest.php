@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use NiekNijland\MotorOccasion\Data\Brand;
@@ -20,6 +21,7 @@ use NiekNijland\MotorOccasion\Data\Result;
 use NiekNijland\MotorOccasion\Data\SearchCriteria;
 use NiekNijland\MotorOccasion\Data\SearchResult;
 use NiekNijland\MotorOccasion\Data\Seller;
+use NiekNijland\MotorOccasion\Data\SortOrder;
 use NiekNijland\MotorOccasion\Data\Type;
 use NiekNijland\MotorOccasion\Exception\MotorOccasionException;
 use NiekNijland\MotorOccasion\MotorOccasion;
@@ -33,6 +35,17 @@ class MotorOccasionTest extends TestCase
         return new Client([
             'handler' => HandlerStack::create($mockHandler),
         ]);
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $history
+     */
+    private function createClientWithMockAndHistory(MockHandler $mockHandler, array &$history): Client
+    {
+        $stack = HandlerStack::create($mockHandler);
+        $stack->push(Middleware::history($history));
+
+        return new Client(['handler' => $stack]);
     }
 
     private function sessionResponse(): Response
@@ -1260,5 +1273,118 @@ class MotorOccasionTest extends TestCase
         $this->expectExceptionMessage('Invalid odometer unit: FURLONGS');
 
         ListingDetail::fromArray($data);
+    }
+
+    // --- Sort order ---
+
+    public function test_search_sends_default_order_when_no_sort_order_specified(): void
+    {
+        $brand = new Brand(name: 'BMW', value: 'bmw');
+
+        $mock = new MockHandler([
+            $this->sessionResponse(),
+            $this->okResponse(), // setSessionParam brand
+            $this->okResponse($this->resultsFixture()), // AJAX /mz.php
+        ]);
+
+        $history = [];
+        $httpClient = $this->createClientWithMockAndHistory($mock, $history);
+
+        $client = new MotorOccasion(httpClient: $httpClient);
+        $client->search(new SearchCriteria(brand: $brand));
+
+        $lastRequest = end($history);
+        $query = $lastRequest['request']->getUri()->getQuery();
+
+        $this->assertStringContainsString('params%5Border%5D=default', $query);
+    }
+
+    public function test_search_sends_specified_sort_order(): void
+    {
+        $brand = new Brand(name: 'BMW', value: 'bmw');
+
+        $mock = new MockHandler([
+            $this->sessionResponse(),
+            $this->okResponse(), // setSessionParam brand
+            $this->okResponse($this->resultsFixture()), // AJAX /mz.php
+        ]);
+
+        $history = [];
+        $httpClient = $this->createClientWithMockAndHistory($mock, $history);
+
+        $client = new MotorOccasion(httpClient: $httpClient);
+        $client->search(new SearchCriteria(brand: $brand, sortOrder: SortOrder::YearDescending));
+
+        $lastRequest = end($history);
+        $query = $lastRequest['request']->getUri()->getQuery();
+
+        $this->assertStringContainsString('params%5Border%5D=bwjr-desc', $query);
+    }
+
+    public function test_search_sends_price_ascending_sort_order(): void
+    {
+        $brand = new Brand(name: 'BMW', value: 'bmw');
+
+        $mock = new MockHandler([
+            $this->sessionResponse(),
+            $this->okResponse(), // setSessionParam brand
+            $this->okResponse($this->resultsFixture()), // AJAX /mz.php
+        ]);
+
+        $history = [];
+        $httpClient = $this->createClientWithMockAndHistory($mock, $history);
+
+        $client = new MotorOccasion(httpClient: $httpClient);
+        $client->search(new SearchCriteria(brand: $brand, sortOrder: SortOrder::PriceAscending));
+
+        $lastRequest = end($history);
+        $query = $lastRequest['request']->getUri()->getQuery();
+
+        $this->assertStringContainsString('params%5Border%5D=pric-asc', $query);
+    }
+
+    public function test_get_offers_sends_default_update_order_when_no_sort_order_specified(): void
+    {
+        $mock = new MockHandler([
+            $this->sessionResponse(),
+            $this->okResponse($this->offersFixture()), // AJAX /ms.php
+        ]);
+
+        $history = [];
+        $httpClient = $this->createClientWithMockAndHistory($mock, $history);
+
+        $client = new MotorOccasion(httpClient: $httpClient);
+        $client->getOffers();
+
+        $lastRequest = end($history);
+        $query = $lastRequest['request']->getUri()->getQuery();
+
+        $this->assertStringContainsString('params%5Border%5D=update', $query);
+    }
+
+    public function test_get_offers_sends_specified_sort_order(): void
+    {
+        $mock = new MockHandler([
+            $this->sessionResponse(),
+            $this->okResponse($this->offersFixture()), // AJAX /ms.php
+        ]);
+
+        $history = [];
+        $httpClient = $this->createClientWithMockAndHistory($mock, $history);
+
+        $client = new MotorOccasion(httpClient: $httpClient);
+        $client->getOffers(sortOrder: SortOrder::PriceDescending);
+
+        $lastRequest = end($history);
+        $query = $lastRequest['request']->getUri()->getQuery();
+
+        $this->assertStringContainsString('params%5Border%5D=pric-desc', $query);
+    }
+
+    public function test_search_criteria_default_sort_order_is_null(): void
+    {
+        $criteria = new SearchCriteria();
+
+        $this->assertNull($criteria->sortOrder);
     }
 }

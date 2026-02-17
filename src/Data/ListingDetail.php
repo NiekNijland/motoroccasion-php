@@ -7,8 +7,8 @@ namespace NiekNijland\MotorOccasion\Data;
 readonly class ListingDetail
 {
     /**
-     * @param  string[]  $images
-     * @param  array<string, string>  $specifications
+     * @param string[] $images
+     * @param array<string, string> $specifications
      */
     public function __construct(
         public string $brand,
@@ -28,10 +28,11 @@ readonly class ListingDetail
         public array $specifications,
         public string $url,
         public Seller $seller,
-    ) {}
+    ) {
+    }
 
     /**
-     * @param  array{brand: string, model: string, price: int, originalPrice: ?int, monthlyLease: ?int, year: int, odometerReading: int, odometerReadingUnit: string, color: ?string, powerKw: ?int, license: ?string, warranty: ?bool, images: string[], description: ?string, specifications: array<string, string>, url: string, seller: array{name: string, province: ?string, website: string, address: ?string, city: ?string, phone: ?string}}  $data
+     * @param array{brand: string, model: string, price: int, originalPrice: ?int, monthlyLease: ?int, year: int, odometerReading: int, odometerReadingUnit: string, color: ?string, powerKw: ?int, license: ?string, warranty: ?bool, images: string[], description: ?string, specifications: array<string, string>, url: string, seller: array{name: string, province: ?string, website: string, address: ?string, city: ?string, phone: ?string}} $data
      */
     public static function fromArray(array $data): self
     {

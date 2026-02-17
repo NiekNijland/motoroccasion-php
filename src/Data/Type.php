@@ -10,5 +10,6 @@ readonly class Type
         public string $name,
         public string $value,
         public Brand $brand,
-    ) {}
+    ) {
+    }
 }

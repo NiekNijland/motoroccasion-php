@@ -18,10 +18,11 @@ readonly class Result
         public Seller $seller,
         public ?int $originalPrice = null,
         public ?int $monthlyLease = null,
-    ) {}
+    ) {
+    }
 
     /**
-     * @param  array{brand: string, model: string, price: int, year: int, odometerReading: int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string}, originalPrice?: ?int, monthlyLease?: ?int}  $data
+     * @param array{brand: string, model: string, price: int, year: int, odometerReading: int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string}, originalPrice?: ?int, monthlyLease?: ?int} $data
      */
     public static function fromArray(array $data): self
     {

@@ -8,8 +8,8 @@ use Rector\Exception\Configuration\InvalidConfigurationException;
 try {
     return RectorConfig::configure()
         ->withPaths([
-            __DIR__.'/src',
-            __DIR__.'/tests',
+            __DIR__ . '/src',
+            __DIR__ . '/tests',
         ])
         ->withPhpSets()
         ->withImportNames()

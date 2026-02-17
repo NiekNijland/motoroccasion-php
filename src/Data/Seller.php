@@ -13,10 +13,11 @@ readonly class Seller
         public ?string $address = null,
         public ?string $city = null,
         public ?string $phone = null,
-    ) {}
+    ) {
+    }
 
     /**
-     * @param  array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string}  $data
+     * @param array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string} $data
      */
     public static function fromArray(array $data): self
     {

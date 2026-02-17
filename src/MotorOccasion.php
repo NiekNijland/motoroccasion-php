@@ -36,9 +36,9 @@ class MotorOccasion
     /** @var Category[]|null */
     private ?array $categories = null;
 
-    public function __construct(private readonly ClientInterface $httpClient = new Client)
+    public function __construct(private readonly ClientInterface $httpClient = new Client())
     {
-        $this->cookieJar = new CookieJar;
+        $this->cookieJar = new CookieJar();
     }
 
     /**
@@ -55,7 +55,7 @@ class MotorOccasion
         try {
             $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $jsonException) {
-            throw new MotorOccasionException('Failed to decode brands response: '.$jsonException->getMessage(), previous: $jsonException);
+            throw new MotorOccasionException('Failed to decode brands response: ' . $jsonException->getMessage(), previous: $jsonException);
         }
 
         return $this->parseBrandsHtml($data['brands']);
@@ -80,7 +80,7 @@ class MotorOccasion
         try {
             $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $jsonException) {
-            throw new MotorOccasionException('Failed to decode types response: '.$jsonException->getMessage(), previous: $jsonException);
+            throw new MotorOccasionException('Failed to decode types response: ' . $jsonException->getMessage(), previous: $jsonException);
         }
 
         return $this->parseTypesHtml($data['types'], $brand);
@@ -185,7 +185,7 @@ class MotorOccasion
     {
         $this->ensureSession();
 
-        $url = self::BASE_URL.$result->url;
+        $url = self::BASE_URL . $result->url;
 
         $response = $this->httpClient->request('GET', $url, [
             'cookies' => $this->cookieJar,
@@ -205,19 +205,19 @@ class MotorOccasion
      */
     public function resetSession(): void
     {
-        $this->cookieJar = new CookieJar;
+        $this->cookieJar = new CookieJar();
         $this->homepageHtml = null;
         $this->categories = null;
     }
 
     /**
-     * @param  array<string, string>  $query
+     * @param array<string, string> $query
      *
      * @throws MotorOccasionException
      */
     private function fetchAjaxResults(string $endpoint, array $query): string
     {
-        $response = $this->httpClient->request('GET', self::BASE_URL.$endpoint, [
+        $response = $this->httpClient->request('GET', self::BASE_URL . $endpoint, [
             'cookies' => $this->cookieJar,
             'query' => $query,
             'headers' => [
@@ -226,7 +226,7 @@ class MotorOccasion
         ]);
 
         if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not fetch AJAX results from '.$endpoint);
+            throw new MotorOccasionException('Could not fetch AJAX results from ' . $endpoint);
         }
 
         return $response->getBody()->getContents();
@@ -356,16 +356,16 @@ class MotorOccasion
      */
     private function setSessionParam(string $key, string $value): void
     {
-        $response = $this->httpClient->request('GET', self::BASE_URL.'/mz.php', [
+        $response = $this->httpClient->request('GET', self::BASE_URL . '/mz.php', [
             'cookies' => $this->cookieJar,
             'query' => [
-                'params['.$key.']' => $value,
+                'params[' . $key . ']' => $value,
                 'params[a]' => 'check',
             ],
         ]);
 
         if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not set search parameter: '.$key);
+            throw new MotorOccasionException('Could not set search parameter: ' . $key);
         }
     }
 
@@ -374,7 +374,7 @@ class MotorOccasion
      */
     private function fetchSearchForm(): string
     {
-        $response = $this->httpClient->request('GET', self::BASE_URL.'/fs.php', [
+        $response = $this->httpClient->request('GET', self::BASE_URL . '/fs.php', [
             'cookies' => $this->cookieJar,
             'query' => ['s' => 'mz'],
         ]);
@@ -425,7 +425,7 @@ class MotorOccasion
     {
         $doc = new DOMDocument(encoding: 'UTF-8');
 
-        @$doc->loadHTML('<html lang="en"><body><select id="select">'.$html.'</select></body></html>');
+        @$doc->loadHTML('<html lang="en"><body><select id="select">' . $html . '</select></body></html>');
 
         /** @var ?DOMElement $select */
         $select = $doc->getElementById('select');
@@ -497,7 +497,7 @@ class MotorOccasion
     {
         $doc = new DOMDocument(encoding: 'UTF-8');
 
-        @$doc->loadHTML('<html><body><div id="results-wrapper">'.$html.'</div></body></html>');
+        @$doc->loadHTML('<html><body><div id="results-wrapper">' . $html . '</div></body></html>');
 
         /** @var ?DOMElement $wrapper */
         $wrapper = $doc->getElementById('results-wrapper');
@@ -522,7 +522,7 @@ class MotorOccasion
     {
         $doc = new DOMDocument(encoding: 'UTF-8');
 
-        @$doc->loadHTML('<html><body><div id="offers-wrapper">'.$html.'</div></body></html>');
+        @$doc->loadHTML('<html><body><div id="offers-wrapper">' . $html . '</div></body></html>');
 
         /** @var ?DOMElement $wrapper */
         $wrapper = $doc->getElementById('offers-wrapper');
@@ -539,7 +539,7 @@ class MotorOccasion
     }
 
     /**
-     * @param  Result[]  $results
+     * @param Result[] $results
      */
     private function collectOfferNodes(DOMElement $element, array &$results): void
     {
@@ -721,7 +721,7 @@ class MotorOccasion
     }
 
     /**
-     * @param  Result[]  $results
+     * @param Result[] $results
      */
     private function collectResultNodes(DOMElement $element, array &$results): void
     {
@@ -1121,7 +1121,7 @@ class MotorOccasion
         $result = $xpath->query($expression, $contextNode);
 
         if ($result === false) {
-            throw new MotorOccasionException('Invalid XPath expression: '.$expression);
+            throw new MotorOccasionException('Invalid XPath expression: ' . $expression);
         }
 
         /** @var DOMNodeList<DOMNode> $result */

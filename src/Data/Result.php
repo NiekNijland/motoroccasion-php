@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace NiekNijland\MotorOccasion\Data;
 
+use NiekNijland\MotorOccasion\Exception\MotorOccasionException;
+use ValueError;
+
 readonly class Result
 {
     public function __construct(
@@ -24,16 +27,27 @@ readonly class Result
 
     /**
      * @param array{brand: string, model: string, price: int, year: int, odometerReading: int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string}, id?: ?int, originalPrice?: ?int, monthlyLease?: ?int} $data
+     *
+     * @throws MotorOccasionException
      */
     public static function fromArray(array $data): self
     {
+        try {
+            $odometerUnit = OdometerUnit::from($data['odometerReadingUnit']);
+        } catch (ValueError $valueError) {
+            throw new MotorOccasionException(
+                'Invalid odometer unit: ' . $data['odometerReadingUnit'],
+                previous: $valueError,
+            );
+        }
+
         return new self(
             brand: $data['brand'],
             model: $data['model'],
             price: $data['price'],
             year: $data['year'],
             odometerReading: $data['odometerReading'],
-            odometerReadingUnit: OdometerUnit::from($data['odometerReadingUnit']),
+            odometerReadingUnit: $odometerUnit,
             image: $data['image'],
             url: $data['url'],
             seller: Seller::fromArray($data['seller']),

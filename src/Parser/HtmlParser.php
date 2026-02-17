@@ -180,8 +180,8 @@ class HtmlParser
         $xpath = new DOMXPath($doc);
 
         // Brand and model from page title
-        $titleNode = $this->xpathQuery($xpath, '//title')->item(0);
-        $titleText = $titleNode->nodeValue ?? '';
+        $titleNodes = $this->xpathQuery($xpath, '//title');
+        $titleText = $titleNodes->length > 0 ? ($titleNodes->item(0)->nodeValue ?? '') : '';
         [$brand, $model] = $this->parseBrandAndModel($titleText);
 
         // Header area text for specs

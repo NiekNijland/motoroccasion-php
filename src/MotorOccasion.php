@@ -40,7 +40,7 @@ class MotorOccasion implements MotorOccasionInterface
      * @param ClientInterface $httpClient HTTP client for making requests
      * @param CacheInterface|null $cache Optional PSR-16 cache for brands and categories
      * @param int $cacheTtl Cache TTL in seconds (default: 1 hour)
-     * @param Closure|null $clock Optional clock function returning a Unix timestamp (int), used instead of time()
+     * @param (Closure(): int)|null $clock Optional clock function returning a Unix timestamp, used instead of time()
      */
     public function __construct(
         private readonly ClientInterface $httpClient = new Client(),
@@ -231,7 +231,7 @@ class MotorOccasion implements MotorOccasionInterface
         }
 
         if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not fetch detail page');
+            throw new MotorOccasionException('Could not fetch detail page (HTTP ' . $response->getStatusCode() . ')');
         }
 
         $html = $response->getBody()->getContents();
@@ -286,7 +286,7 @@ class MotorOccasion implements MotorOccasionInterface
         }
 
         if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not fetch AJAX results from ' . $endpoint);
+            throw new MotorOccasionException('Could not fetch AJAX results from ' . $endpoint . ' (HTTP ' . $response->getStatusCode() . ')');
         }
 
         return $response->getBody()->getContents();
@@ -310,7 +310,7 @@ class MotorOccasion implements MotorOccasionInterface
         }
 
         if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not retrieve session from motoroccasion.nl');
+            throw new MotorOccasionException('Could not retrieve session from motoroccasion.nl (HTTP ' . $response->getStatusCode() . ')');
         }
 
         $this->homepageHtml = $response->getBody()->getContents();
@@ -433,7 +433,7 @@ class MotorOccasion implements MotorOccasionInterface
         }
 
         if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not set search parameter: ' . $key);
+            throw new MotorOccasionException('Could not set search parameter: ' . $key . ' (HTTP ' . $response->getStatusCode() . ')');
         }
     }
 
@@ -452,7 +452,7 @@ class MotorOccasion implements MotorOccasionInterface
         }
 
         if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not fetch search form');
+            throw new MotorOccasionException('Could not fetch search form (HTTP ' . $response->getStatusCode() . ')');
         }
 
         return $response->getBody()->getContents();

@@ -88,7 +88,7 @@ $results = $client->search(new SearchCriteria(
     category: $categories[6],      // Naked
     engineCapacityMin: 600,
     engineCapacityMax: 900,
-    license: 'A2',
+    license: LicenseCategory::A2,
     odometerMax: 30000,
 ));
 
@@ -117,7 +117,7 @@ All available `SearchCriteria` fields:
 | `odometerMin` / `odometerMax` | `?int` | Mileage range |
 | `engineCapacityMin` / `engineCapacityMax` | `?int` | Engine displacement in cc |
 | `powerMin` / `powerMax` | `?int` | Power in kW |
-| `license` | `?string` | License type (A, A1, A2, AM, B) |
+| `license` | `?LicenseCategory` | License type (A, A1, A2, AM, B) |
 | `electric` | `?bool` | Electric motorcycles only |
 | `vatDeductible` | `?bool` | VAT-deductible (BTW) only |
 | `postalCode` | `?string` | Dutch postal code for proximity search |
@@ -151,19 +151,20 @@ Each result in the array is a `Result` object:
 
 ```php
 foreach ($results->results as $listing) {
-    $listing->brand;              // "YAMAHA"
-    $listing->model;              // "MT 07"
-    $listing->price;              // 6450 (EUR, int)
-    $listing->year;               // 2019
-    $listing->odometerReading;    // 23500
-    $listing->odometerReadingUnit; // "KM"
-    $listing->image;              // "https://www.motoroccasion.nl/fotos/..."
-    $listing->url;                // "/motor/12345/yamaha-mt-07"
-    $listing->originalPrice;      // 7200 (or null)
-    $listing->monthlyLease;       // 134 (EUR/month, or null)
-    $listing->seller->name;       // "Goedhart Motoren"
-    $listing->seller->province;   // Province::ZuidHolland (or null)
-    $listing->seller->website;    // "https://www.goedhart.nl"
+    $listing->id;                  // 12345 (numeric listing ID, or null)
+    $listing->brand;               // "YAMAHA"
+    $listing->model;               // "MT 07"
+    $listing->price;               // 6450 (EUR, int)
+    $listing->year;                // 2019
+    $listing->odometerReading;     // 23500
+    $listing->odometerReadingUnit; // OdometerUnit::Kilometers
+    $listing->image;               // "https://www.motoroccasion.nl/fotos/..."
+    $listing->url;                 // "/motor/12345/yamaha-mt-07"
+    $listing->originalPrice;       // 7200 (or null)
+    $listing->monthlyLease;        // 134 (EUR/month, or null)
+    $listing->seller->name;        // "Goedhart Motoren"
+    $listing->seller->province;    // Province::ZuidHolland (or null)
+    $listing->seller->website;     // "https://www.goedhart.nl"
 }
 ```
 
@@ -174,6 +175,7 @@ Fetch the full detail page for a listing. This provides additional info like col
 ```php
 $detail = $client->getDetail($listing);
 
+$detail->id;               // 12345 (numeric listing ID, or null)
 $detail->brand;            // "YAMAHA"
 $detail->model;            // "MT 07"
 $detail->price;            // 6450
@@ -181,10 +183,10 @@ $detail->originalPrice;    // 7200 (or null)
 $detail->monthlyLease;     // 134 (EUR/month, or null)
 $detail->year;             // 2019
 $detail->odometerReading;  // 23500
-$detail->odometerReadingUnit; // "KM"
+$detail->odometerReadingUnit; // OdometerUnit::Kilometers
 $detail->color;            // "ZWART"
 $detail->powerKw;          // 55 (kW, or null)
-$detail->license;          // "A2"
+$detail->license;          // LicenseCategory::A2 (or null)
 $detail->warranty;         // true (or null)
 $detail->images;           // ["https://...photo1.jpg", "https://...photo2.jpg", ...]
 $detail->description;      // "Mooie MT-07 in perfecte staat..."
@@ -229,16 +231,75 @@ Province::tryFromAbbreviation('Z-H'); // Province::ZuidHolland
 Province::tryFromAbbreviation('GLD'); // Province::Gelderland
 ```
 
+### OdometerUnit enum
+
+Odometer readings use the `OdometerUnit` enum instead of raw strings.
+
+```php
+use NiekNijland\MotorOccasion\Data\OdometerUnit;
+
+$listing->odometerReadingUnit;          // OdometerUnit::Kilometers
+$listing->odometerReadingUnit->value;   // "KM"
+
+// Available cases
+OdometerUnit::Kilometers; // "KM"
+OdometerUnit::Miles;      // "MI"
+```
+
+### LicenseCategory enum
+
+Dutch motorcycle license categories are represented as a `LicenseCategory` enum.
+
+```php
+use NiekNijland\MotorOccasion\Data\LicenseCategory;
+
+$detail->license;          // LicenseCategory::A2
+$detail->license->value;   // "A2"
+
+// Available cases
+LicenseCategory::A;   // "A"  - full motorcycle license
+LicenseCategory::A1;  // "A1" - light motorcycles (max 125cc / 11kW)
+LicenseCategory::A2;  // "A2" - medium motorcycles (max 35kW)
+LicenseCategory::AM;  // "AM" - mopeds
+LicenseCategory::B;   // "B"  - trikes/quads (car license)
+
+// Use in search criteria
+$results = $client->search(new SearchCriteria(license: LicenseCategory::A2));
+```
+
 ### Serialization
 
-`Result`, `Seller`, and `ListingDetail` support `toArray()` and `fromArray()` for serialization (e.g. caching or storing in a database).
+All DTOs support `toArray()` and `fromArray()` for serialization (e.g. caching or storing in a database). Enum values are serialized as their string backing values.
 
 ```php
 $array = $listing->toArray();
-// ['brand' => 'YAMAHA', 'model' => 'MT 07', 'price' => 6450, 'seller' => ['name' => '...', ...], ...]
+// ['brand' => 'YAMAHA', 'model' => 'MT 07', 'price' => 6450, 'odometerReadingUnit' => 'KM', 'seller' => ['name' => '...', ...], ...]
 
 $restored = Result::fromArray($array);
+
+// Also works for Brand, Category, Type, Seller, ListingDetail
+$brand->toArray();                   // ['name' => 'BMW', 'value' => 'bmw']
+Brand::fromArray($brandArray);
 ```
+
+### Caching
+
+Pass any PSR-16 (`psr/simple-cache`) implementation to cache brands and categories, avoiding repeated HTTP requests.
+
+```php
+use NiekNijland\MotorOccasion\MotorOccasion;
+
+$client = new MotorOccasion(
+    cache: $yourPsr16Cache,
+    cacheTtl: 3600, // seconds (default: 1 hour)
+);
+
+$brands = $client->getBrands();      // fetched from site, stored in cache
+$brands = $client->getBrands();      // returned from cache (no HTTP)
+$categories = $client->getCategories(); // also cached
+```
+
+Calling `resetSession()` invalidates both in-memory and external cache entries.
 
 ### Session management
 
@@ -246,6 +307,16 @@ The client automatically manages PHP session cookies required by motoroccasion.n
 
 ```php
 $client->resetSession();
+```
+
+### Interface
+
+The client implements `MotorOccasionInterface`, which can be used for type-hinting and mocking in tests.
+
+```php
+use NiekNijland\MotorOccasion\MotorOccasionInterface;
+
+public function __construct(private MotorOccasionInterface $client) {}
 ```
 
 ### Error handling
@@ -269,6 +340,93 @@ try {
 ```bash
 composer test
 ```
+
+### Testing your application
+
+This package ships with a `FakeMotorOccasion` client and DTO factories in `NiekNijland\MotorOccasion\Testing\` to make it easy to test code that depends on this package — no HTTP mocking required.
+
+#### FakeMotorOccasion
+
+A drop-in replacement for the real client. Seed it with data and use it via dependency injection.
+
+```php
+use NiekNijland\MotorOccasion\Testing\FakeMotorOccasion;
+use NiekNijland\MotorOccasion\Testing\BrandFactory;
+use NiekNijland\MotorOccasion\Testing\ResultFactory;
+
+$fake = new FakeMotorOccasion(
+    brands: BrandFactory::makeMany(5),
+    results: ResultFactory::makeMany(10),
+);
+
+// Use it like the real client
+$brands = $fake->getBrands();           // returns seeded brands
+$results = $fake->search($criteria);    // paginates seeded results
+
+// Assert calls were made
+$fake->assertCalled('getBrands');
+$fake->assertCalledTimes('search', 1);
+$fake->assertNotCalled('getOffers');
+
+// Simulate errors
+$fake->shouldThrow(new MotorOccasionException('Service down'));
+```
+
+Fluent setters for configuration:
+
+```php
+$fake = (new FakeMotorOccasion())
+    ->setBrands(BrandFactory::makeMany(3))
+    ->setCategories(CategoryFactory::makeMany(5))
+    ->setResults(ResultFactory::makeMany(20));
+```
+
+For detail pages, map results to details:
+
+```php
+$result = ResultFactory::make();
+$detail = ListingDetailFactory::make(url: $result->url);
+
+$fake->setDetail($result, $detail);
+$fake->getDetail($result); // returns the seeded detail
+```
+
+#### DTO Factories
+
+Every DTO has a factory with sensible defaults. Override only what you need:
+
+```php
+use NiekNijland\MotorOccasion\Testing\ResultFactory;
+use NiekNijland\MotorOccasion\Testing\ListingDetailFactory;
+use NiekNijland\MotorOccasion\Testing\SellerFactory;
+
+// One-liner with all defaults
+$result = ResultFactory::make();
+
+// Override specific fields
+$result = ResultFactory::make(brand: 'Honda', price: 5000, year: 2023);
+
+// Generate multiple
+$results = ResultFactory::makeMany(10);
+
+// ListingDetail — no more 17-parameter constructors
+$detail = ListingDetailFactory::make(color: 'ROOD', warranty: false);
+
+// Seller variants
+$dealer = SellerFactory::makeDealer();   // full dealer info (address, phone, etc.)
+$private = SellerFactory::makePrivate(); // "Particulier" with no contact info
+```
+
+Available factories:
+
+| Factory | Method(s) | Default |
+|---|---|---|
+| `BrandFactory` | `make()`, `makeMany()` | BMW |
+| `CategoryFactory` | `make()`, `makeMany()` | Naked |
+| `TypeFactory` | `make()`, `makeMany()` | R 1250 GS (BMW) |
+| `SellerFactory` | `make()`, `makeDealer()`, `makePrivate()` | De Motor Shop |
+| `ResultFactory` | `make()`, `makeMany()` | BMW R 1250 GS, EUR 18,950 |
+| `ListingDetailFactory` | `make()` | BMW R 1250 GS with full specs |
 
 ## License
 

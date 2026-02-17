@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace NiekNijland\MotorOccasion\Data;
 
+use NiekNijland\MotorOccasion\Exception\MotorOccasionException;
+use ValueError;
+
 readonly class ListingDetail
 {
     /**
@@ -34,9 +37,20 @@ readonly class ListingDetail
 
     /**
      * @param array{brand: string, model: string, price: int, originalPrice: ?int, monthlyLease: ?int, year: int, odometerReading: int, odometerReadingUnit: string, color: ?string, powerKw: ?int, license: ?string, warranty: ?bool, images: string[], description: ?string, specifications: array<string, string>, url: string, seller: array{name: string, province: ?string, website: string, address: ?string, city: ?string, phone: ?string}, id?: ?int} $data
+     *
+     * @throws MotorOccasionException
      */
     public static function fromArray(array $data): self
     {
+        try {
+            $odometerUnit = OdometerUnit::from($data['odometerReadingUnit']);
+        } catch (ValueError $valueError) {
+            throw new MotorOccasionException(
+                'Invalid odometer unit: ' . $data['odometerReadingUnit'],
+                previous: $valueError,
+            );
+        }
+
         return new self(
             brand: $data['brand'],
             model: $data['model'],
@@ -45,7 +59,7 @@ readonly class ListingDetail
             monthlyLease: $data['monthlyLease'],
             year: $data['year'],
             odometerReading: $data['odometerReading'],
-            odometerReadingUnit: OdometerUnit::from($data['odometerReadingUnit']),
+            odometerReadingUnit: $odometerUnit,
             color: $data['color'],
             powerKw: $data['powerKw'],
             license: isset($data['license']) ? LicenseCategory::tryFrom($data['license']) : null,

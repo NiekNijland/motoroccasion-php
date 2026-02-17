@@ -1200,4 +1200,65 @@ class MotorOccasionTest extends TestCase
         $this->assertNotNull($cached);
         $this->assertCount(17, $cached);
     }
+
+    // --- fromArray() invalid enum values ---
+
+    public function test_result_from_array_invalid_odometer_unit_throws_motor_occasion_exception(): void
+    {
+        $data = [
+            'brand' => 'BMW',
+            'model' => 'R 1250 GS',
+            'price' => 18950,
+            'year' => 2021,
+            'odometerReading' => 25000,
+            'odometerReadingUnit' => 'INVALID',
+            'image' => 'https://example.com/bmw.jpg',
+            'url' => '/motor/12345/bmw-r-1250-gs',
+            'seller' => [
+                'name' => 'Test',
+                'province' => null,
+                'website' => '',
+            ],
+        ];
+
+        $this->expectException(MotorOccasionException::class);
+        $this->expectExceptionMessage('Invalid odometer unit: INVALID');
+
+        Result::fromArray($data);
+    }
+
+    public function test_listing_detail_from_array_invalid_odometer_unit_throws_motor_occasion_exception(): void
+    {
+        $data = [
+            'brand' => 'BMW',
+            'model' => 'R 4',
+            'price' => 12500,
+            'originalPrice' => null,
+            'monthlyLease' => null,
+            'year' => 1936,
+            'odometerReading' => 60949,
+            'odometerReadingUnit' => 'FURLONGS',
+            'color' => null,
+            'powerKw' => null,
+            'license' => null,
+            'warranty' => null,
+            'images' => [],
+            'description' => null,
+            'specifications' => [],
+            'url' => '/motor/99999/bmw-r-4',
+            'seller' => [
+                'name' => 'Test',
+                'province' => null,
+                'website' => '',
+                'address' => null,
+                'city' => null,
+                'phone' => null,
+            ],
+        ];
+
+        $this->expectException(MotorOccasionException::class);
+        $this->expectExceptionMessage('Invalid odometer unit: FURLONGS');
+
+        ListingDetail::fromArray($data);
+    }
 }

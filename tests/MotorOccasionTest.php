@@ -41,27 +41,27 @@ class MotorOccasionTest extends TestCase
 
     private function homepageFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/homepage.html');
+        return file_get_contents(__DIR__ . '/Fixtures/homepage.html');
     }
 
     private function searchFormFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/search-form.json');
+        return file_get_contents(__DIR__ . '/Fixtures/search-form.json');
     }
 
     private function resultsFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/results.html');
+        return file_get_contents(__DIR__ . '/Fixtures/results.html');
     }
 
     private function detailFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/detail.html');
+        return file_get_contents(__DIR__ . '/Fixtures/detail.html');
     }
 
     private function offersFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/offers.html');
+        return file_get_contents(__DIR__ . '/Fixtures/offers.html');
     }
 
     public function test_get_brands_parses_brand_options(): void

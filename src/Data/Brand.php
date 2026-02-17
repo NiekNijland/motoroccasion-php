@@ -9,5 +9,6 @@ readonly class Brand
     public function __construct(
         public string $name,
         public string $value,
-    ) {}
+    ) {
+    }
 }

@@ -9,5 +9,6 @@ readonly class Category
     public function __construct(
         public string $name,
         public string $value,
-    ) {}
+    ) {
+    }
 }

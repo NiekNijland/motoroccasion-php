@@ -6,4 +6,6 @@ namespace NiekNijland\MotorOccasion\Exception;
 
 use RuntimeException;
 
-class MotorOccasionException extends RuntimeException {}
+class MotorOccasionException extends RuntimeException
+{
+}

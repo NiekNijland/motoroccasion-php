@@ -7,14 +7,15 @@ namespace NiekNijland\MotorOccasion\Data;
 readonly class SearchResult
 {
     /**
-     * @param  Result[]  $results
+     * @param Result[] $results
      */
     public function __construct(
         public array $results,
         public int $totalCount,
         public int $currentPage = 1,
         public int $perPage = 20,
-    ) {}
+    ) {
+    }
 
     public function totalPages(): int
     {

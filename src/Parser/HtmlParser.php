@@ -23,6 +23,7 @@ use NiekNijland\MotorOccasion\Exception\MotorOccasionException;
 class HtmlParser
 {
     private const string BASE_URL = 'https://www.motoroccasion.nl';
+
     /**
      * @return Brand[]
      */

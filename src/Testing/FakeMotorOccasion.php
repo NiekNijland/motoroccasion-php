@@ -255,7 +255,7 @@ class FakeMotorOccasion implements MotorOccasionInterface
 
         if ($actual !== $expected) {
             throw new RuntimeException(
-                "Expected {$method}() to be called {$expected} time(s), but was called {$actual} time(s).",
+                sprintf('Expected %s() to be called %d time(s), but was called %d time(s).', $method, $expected, $actual),
             );
         }
     }
@@ -269,7 +269,7 @@ class FakeMotorOccasion implements MotorOccasionInterface
     {
         if ($this->wasNotCalled($method)) {
             throw new RuntimeException(
-                "Expected {$method}() to be called, but it was never called.",
+                sprintf('Expected %s() to be called, but it was never called.', $method),
             );
         }
     }
@@ -285,7 +285,7 @@ class FakeMotorOccasion implements MotorOccasionInterface
 
         if ($count > 0) {
             throw new RuntimeException(
-                "Expected {$method}() to never be called, but it was called {$count} time(s).",
+                sprintf('Expected %s() to never be called, but it was called %d time(s).', $method, $count),
             );
         }
     }

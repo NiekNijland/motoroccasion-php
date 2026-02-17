@@ -775,7 +775,7 @@ class MotorOccasion
         $brandNodes = $this->xpathQuery($xpath, './/*[contains(@class, "tile-brandname")]', $node);
 
         if ($brandNodes->length > 0) {
-            $brand = trim(str_replace("\xC2\xA0", '', $brandNodes->item(0)?->textContent ?? ''));
+            $brand = trim(str_replace("\xC2\xA0", '', $brandNodes->item(0)->textContent ?? ''));
         }
 
         // Model from tile-typename span
@@ -783,7 +783,7 @@ class MotorOccasion
         $typeNodes = $this->xpathQuery($xpath, './/*[contains(@class, "tile-typename")]', $node);
 
         if ($typeNodes->length > 0) {
-            $model = trim($typeNodes->item(0)?->textContent ?? '');
+            $model = trim($typeNodes->item(0)->textContent ?? '');
         }
 
         if ($brand === '' && $model === '') {
@@ -795,7 +795,7 @@ class MotorOccasion
         $priceNodes = $this->xpathQuery($xpath, './/span[contains(@class, "line-tile-price") and not(contains(@class, "line-tile-price-mnth"))]', $node);
 
         if ($priceNodes->length > 0) {
-            $price = $this->parsePriceFromDetail(trim($priceNodes->item(0)?->textContent ?? ''));
+            $price = $this->parsePriceFromDetail(trim($priceNodes->item(0)->textContent ?? ''));
         }
 
         // Year and odometer from line-tile-yearmls
@@ -805,11 +805,11 @@ class MotorOccasion
         $yearMlsNodes = $this->xpathQuery($xpath, './/*[contains(@class, "line-tile-yearmls")]', $node);
 
         if ($yearMlsNodes->length > 0) {
-            $yearAndOdometerDebris = explode(', ', trim($yearMlsNodes->item(0)?->textContent ?? ''));
-            $year = (int) ($yearAndOdometerDebris[0] ?? '0');
+            $yearAndOdometerDebris = explode(', ', trim($yearMlsNodes->item(0)->textContent ?? ''));
+            $year = (int) $yearAndOdometerDebris[0];
 
             $odometerDebris = explode(' ', $yearAndOdometerDebris[1] ?? '');
-            $odometerReading = (int) str_replace('.', '', $odometerDebris[0] ?? '0');
+            $odometerReading = (int) str_replace('.', '', $odometerDebris[0]);
             $odometerReadingUnit = isset($odometerDebris[1]) ? strtoupper($odometerDebris[1]) : 'KM';
 
             if ($odometerReadingUnit === 'NIEUW') {

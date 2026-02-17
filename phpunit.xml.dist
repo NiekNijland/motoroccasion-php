@@ -16,8 +16,12 @@
     backupStaticProperties="false"
 >
     <testsuites>
-        <testsuite name="NiekNijland Test Suite">
+        <testsuite name="Unit">
             <directory>tests</directory>
+            <exclude>tests/IntegrationTest.php</exclude>
+        </testsuite>
+        <testsuite name="Integration">
+            <file>tests/IntegrationTest.php</file>
         </testsuite>
     </testsuites>
 

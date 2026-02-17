@@ -20,7 +20,7 @@ readonly class SearchCriteria
         public ?int $engineCapacityMax = null,
         public ?int $powerMin = null,
         public ?int $powerMax = null,
-        public ?string $license = null,
+        public ?LicenseCategory $license = null,
         public ?bool $electric = null,
         public ?bool $vatDeductible = null,
         public ?string $postalCode = null,

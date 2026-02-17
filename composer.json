@@ -38,7 +38,7 @@
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
-        "test-coverage": "vendor/bin/phpunit --coverage",
+        "test-coverage": "vendor/bin/phpunit --coverage-html build/coverage --coverage-text build/coverage.txt --coverage-clover build/logs/clover.xml --log-junit build/report.junit.xml",
         "format": "vendor/bin/pint",
         "analyse": "vendor/bin/phpstan analyse --memory-limit=2G",
         "rector": "vendor/bin/rector",

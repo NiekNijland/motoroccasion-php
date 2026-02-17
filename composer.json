@@ -1,45 +1,58 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "nieknijland/motor-occasion-php",
+    "description": "PHP Package to fetch from motoroccasion.nl",
     "keywords": [
-        ":vendor_name",
-        ":package_slug"
+        "NiekNijland",
+        "motor-occasion-php"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/nieknijland/motor-occasion-php",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "NiekNijland",
+            "email": "niek@nijland.cc",
             "role": "Developer"
         }
     ],
     "require": {
-        "php": "^8.4"
+        "php": "^8.3",
+        "ext-dom": "*",
+        "guzzlehttp/guzzle": "^7.0"
     },
     "require-dev": {
-        :require_dev_testing,
-        :require_dev_codestyle,
+        "laravel/pint": "^1.0",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^10.3.2",
+        "rector/rector": "^2.0",
         "spatie/ray": "^1.28"
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src"
+            "NiekNijland\\MotorOccasion\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests"
+            "NiekNijland\\MotorOccasion\\Tests\\": "tests"
         }
     },
     "scripts": {
-        :scripts_testing,
-        :scripts_codestyle
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage",
+        "format": "vendor/bin/pint",
+        "analyse": "vendor/bin/phpstan analyse --memory-limit=2G",
+        "rector": "vendor/bin/rector",
+        "rector:dry-run": "vendor/bin/rector process --dry-run",
+        "pint": "@php vendor/bin/pint --config https://raw.githubusercontent.com/DIJ-digital/pint-config/main/pint.json",
+        "codestyle": [
+            "@rector",
+            "@pint",
+            "@analyse"
+        ]
     },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            :plugins_testing,
             "phpstan/extension-installer": true
         }
     },

@@ -18,7 +18,7 @@ class ResultFactory
         int $odometerReading = 25000,
         OdometerUnit $odometerReadingUnit = OdometerUnit::Kilometers,
         string $image = 'https://www.motoroccasion.nl/fotos/12345/thumb.jpg',
-        string $url = '/motor/12345/bmw-r-1250-gs',
+        string $url = 'https://www.motoroccasion.nl/motor/12345/bmw-r-1250-gs',
         ?Seller $seller = null,
         ?int $id = 12345,
         ?int $originalPrice = null,
@@ -62,7 +62,7 @@ class ResultFactory
                 model: $data['model'],
                 price: $data['price'],
                 year: $data['year'],
-                url: '/motor/' . $data['id'] . '/' . strtolower($data['brand']) . '-' . strtolower(str_replace(' ', '-', $data['model'])),
+                url: 'https://www.motoroccasion.nl/motor/' . $data['id'] . '/' . strtolower($data['brand']) . '-' . strtolower(str_replace(' ', '-', $data['model'])),
                 id: $data['id'],
             );
         }

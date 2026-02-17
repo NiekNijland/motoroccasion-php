@@ -176,7 +176,7 @@ class MotorOccasionTest extends TestCase
         $this->assertSame(25000, $results[0]->odometerReading);
         $this->assertSame(OdometerUnit::Kilometers, $results[0]->odometerReadingUnit);
         $this->assertSame('https://www.motoroccasion.nl/fotos/12345/thumb.jpg', $results[0]->image);
-        $this->assertSame('/motor/12345/bmw-r-1250-gs', $results[0]->url);
+        $this->assertSame('https://www.motoroccasion.nl/motor/12345/bmw-r-1250-gs', $results[0]->url);
         $this->assertSame(12345, $results[0]->id);
         $this->assertSame('De Motor Shop', $results[0]->seller->name);
         $this->assertSame(Province::NoordHolland, $results[0]->seller->province);
@@ -330,7 +330,7 @@ class MotorOccasionTest extends TestCase
             odometerReading: 60949,
             odometerReadingUnit: OdometerUnit::Kilometers,
             image: 'https://www.motoroccasion.nl/fotos/99999/thumb.jpg',
-            url: '/motor/99999/bmw-r-4',
+            url: 'https://www.motoroccasion.nl/motor/99999/bmw-r-4',
             seller: new Seller(
                 name: 'MotoPort Goes',
                 province: Province::Zeeland,
@@ -378,7 +378,7 @@ class MotorOccasionTest extends TestCase
         $this->assertSame('400 cc', $detail->specifications['Cilinderinhoud']);
 
         // URL and ID
-        $this->assertSame('/motor/99999/bmw-r-4', $detail->url);
+        $this->assertSame('https://www.motoroccasion.nl/motor/99999/bmw-r-4', $detail->url);
         $this->assertSame(99999, $detail->id);
 
         // Seller
@@ -423,7 +423,7 @@ class MotorOccasionTest extends TestCase
         $this->assertSame(0, $results[0]->odometerReading);
         $this->assertSame(OdometerUnit::Kilometers, $results[0]->odometerReadingUnit);
         $this->assertSame('https://cdn.example.com/suzuki-vstrom.jpg', $results[0]->image);
-        $this->assertSame('/motoren/suzuki-v-strom-800-m1598887.html', $results[0]->url);
+        $this->assertSame('https://www.motoroccasion.nl/motoren/suzuki-v-strom-800-m1598887.html', $results[0]->url);
         $this->assertSame(1598887, $results[0]->id);
         $this->assertSame('Goedhart Motoren', $results[0]->seller->name);
 
@@ -436,7 +436,7 @@ class MotorOccasionTest extends TestCase
         $this->assertSame(2020, $results[1]->year);
         $this->assertSame(9270, $results[1]->odometerReading);
         $this->assertSame(OdometerUnit::Kilometers, $results[1]->odometerReadingUnit);
-        $this->assertSame('/motoren/ktm-350-exc-f-m1615047.html', $results[1]->url);
+        $this->assertSame('https://www.motoroccasion.nl/motoren/ktm-350-exc-f-m1615047.html', $results[1]->url);
         $this->assertSame(1615047, $results[1]->id);
         $this->assertSame('Mulders Motorcycles', $results[1]->seller->name);
 
@@ -479,7 +479,7 @@ class MotorOccasionTest extends TestCase
             odometerReading: 0,
             odometerReadingUnit: OdometerUnit::Kilometers,
             image: 'https://cdn.example.com/suzuki.jpg',
-            url: '/motoren/suzuki-v-strom-800-m1598887.html',
+            url: 'https://www.motoroccasion.nl/motoren/suzuki-v-strom-800-m1598887.html',
             seller: new Seller(
                 name: 'Goedhart Motoren',
                 province: null,
@@ -516,7 +516,7 @@ class MotorOccasionTest extends TestCase
             odometerReading: 25000,
             odometerReadingUnit: OdometerUnit::Kilometers,
             image: 'https://example.com/bmw.jpg',
-            url: '/motor/12345/bmw-r-1250-gs',
+            url: 'https://www.motoroccasion.nl/motor/12345/bmw-r-1250-gs',
             seller: new Seller(
                 name: 'De Motor Shop',
                 province: Province::NoordHolland,
@@ -590,7 +590,7 @@ class MotorOccasionTest extends TestCase
             odometerReading: 60949,
             odometerReadingUnit: OdometerUnit::Kilometers,
             image: 'https://example.com/thumb.jpg',
-            url: '/motor/99999/bmw-r-4',
+            url: 'https://www.motoroccasion.nl/motor/99999/bmw-r-4',
             seller: new Seller(name: 'Test', province: null, website: ''),
         );
 
@@ -666,7 +666,7 @@ class MotorOccasionTest extends TestCase
             odometerReading: 60949,
             odometerReadingUnit: OdometerUnit::Kilometers,
             image: 'https://example.com/thumb.jpg',
-            url: '/motor/99999/bmw-r-4',
+            url: 'https://www.motoroccasion.nl/motor/99999/bmw-r-4',
             seller: new Seller(name: 'Test', province: null, website: ''),
         );
 
@@ -963,7 +963,7 @@ class MotorOccasionTest extends TestCase
             images: ['https://example.com/photo1.jpg', 'https://example.com/photo2.jpg'],
             description: 'A beautiful motorcycle.',
             specifications: ['Merk' => 'BMW', 'Model' => 'R 4'],
-            url: '/motor/99999/bmw-r-4',
+            url: 'https://www.motoroccasion.nl/motor/99999/bmw-r-4',
             seller: new Seller(
                 name: 'MotoPort Goes',
                 province: null,
@@ -1007,7 +1007,7 @@ class MotorOccasionTest extends TestCase
         $this->assertCount(2, $reconstructed->images);
         $this->assertSame('A beautiful motorcycle.', $reconstructed->description);
         $this->assertSame('BMW', $reconstructed->specifications['Merk']);
-        $this->assertSame('/motor/99999/bmw-r-4', $reconstructed->url);
+        $this->assertSame('https://www.motoroccasion.nl/motor/99999/bmw-r-4', $reconstructed->url);
         $this->assertSame('MotoPort Goes', $reconstructed->seller->name);
         $this->assertSame('0113-231640', $reconstructed->seller->phone);
     }
@@ -1030,7 +1030,7 @@ class MotorOccasionTest extends TestCase
             images: [],
             description: null,
             specifications: [],
-            url: '/motor/11111/honda-cb500f',
+            url: 'https://www.motoroccasion.nl/motor/11111/honda-cb500f',
             seller: new Seller(name: 'Particulier', province: null, website: ''),
         );
 
@@ -1213,7 +1213,7 @@ class MotorOccasionTest extends TestCase
             'odometerReading' => 25000,
             'odometerReadingUnit' => 'INVALID',
             'image' => 'https://example.com/bmw.jpg',
-            'url' => '/motor/12345/bmw-r-1250-gs',
+            'url' => 'https://www.motoroccasion.nl/motor/12345/bmw-r-1250-gs',
             'seller' => [
                 'name' => 'Test',
                 'province' => null,
@@ -1245,7 +1245,7 @@ class MotorOccasionTest extends TestCase
             'images' => [],
             'description' => null,
             'specifications' => [],
-            'url' => '/motor/99999/bmw-r-4',
+            'url' => 'https://www.motoroccasion.nl/motor/99999/bmw-r-4',
             'seller' => [
                 'name' => 'Test',
                 'province' => null,

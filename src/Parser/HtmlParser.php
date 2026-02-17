@@ -22,6 +22,7 @@ use NiekNijland\MotorOccasion\Exception\MotorOccasionException;
 
 class HtmlParser
 {
+    private const string BASE_URL = 'https://www.motoroccasion.nl';
     /**
      * @return Brand[]
      */
@@ -397,7 +398,8 @@ class HtmlParser
         $image = $img->getAttribute('src');
 
         $link = $img->parentNode;
-        $url = $link instanceof DOMElement ? $link->getAttribute('href') : '';
+        $href = $link instanceof DOMElement ? $link->getAttribute('href') : '';
+        $url = $href !== '' ? self::BASE_URL . $href : '';
 
         // Brand from tile-brandname span (strip trailing &nbsp;)
         $brand = '';
@@ -581,7 +583,7 @@ class HtmlParser
                 $parentLink = $photoImg->parentNode;
 
                 if ($parentLink instanceof DOMElement && $parentLink->tagName === 'a') {
-                    $url = $parentLink->getAttribute('href');
+                    $url = self::BASE_URL . $parentLink->getAttribute('href');
                 }
             }
         }
@@ -594,7 +596,7 @@ class HtmlParser
                 $contentLink = $contentLinks->item(0);
 
                 if ($contentLink instanceof DOMElement) {
-                    $url = $contentLink->getAttribute('href');
+                    $url = self::BASE_URL . $contentLink->getAttribute('href');
                 }
             }
         }

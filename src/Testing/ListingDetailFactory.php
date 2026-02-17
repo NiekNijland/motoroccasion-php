@@ -31,7 +31,7 @@ class ListingDetailFactory
         array $images = [],
         ?string $description = 'A well-maintained motorcycle in excellent condition.',
         array $specifications = [],
-        string $url = '/motor/12345/bmw-r-1250-gs',
+        string $url = 'https://www.motoroccasion.nl/motor/12345/bmw-r-1250-gs',
         ?Seller $seller = null,
         ?int $id = 12345,
     ): ListingDetail {

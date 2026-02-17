@@ -220,10 +220,8 @@ class MotorOccasion implements MotorOccasionInterface
     {
         $this->ensureSession();
 
-        $url = self::BASE_URL . $result->url;
-
         try {
-            $response = $this->httpClient->request('GET', $url, [
+            $response = $this->httpClient->request('GET', $result->url, [
                 'cookies' => $this->cookieJar,
             ]);
         } catch (GuzzleException $guzzleException) {

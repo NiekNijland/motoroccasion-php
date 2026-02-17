@@ -296,7 +296,7 @@ class IntegrationTest extends TestCase
     {
         $this->assertNotNull(self::$detail, 'Detail could not be fetched');
 
-        if (self::$detail->license !== null) {
+        if (self::$detail->license instanceof LicenseCategory) {
             $this->assertInstanceOf(LicenseCategory::class, self::$detail->license);
         } else {
             $this->assertNull(self::$detail->license);

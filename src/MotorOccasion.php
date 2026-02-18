@@ -219,21 +219,7 @@ class MotorOccasion implements MotorOccasionInterface
      */
     public function getDetail(Result $result): ListingDetail
     {
-        $this->ensureSession();
-
-        try {
-            $response = $this->httpClient->request('GET', $result->url, [
-                'cookies' => $this->cookieJar,
-            ]);
-        } catch (GuzzleException $guzzleException) {
-            throw new MotorOccasionException('HTTP request failed for detail page: ' . $guzzleException->getMessage(), previous: $guzzleException);
-        }
-
-        if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not fetch detail page (HTTP ' . $response->getStatusCode() . ')');
-        }
-
-        $html = $response->getBody()->getContents();
+        $html = $this->fetchDetailHtml($result);
 
         return $this->parser->parseDetailHtml($html, $result->url);
     }
@@ -252,21 +238,7 @@ class MotorOccasion implements MotorOccasionInterface
      */
     public function getImages(Result $result): array
     {
-        $this->ensureSession();
-
-        try {
-            $response = $this->httpClient->request('GET', $result->url, [
-                'cookies' => $this->cookieJar,
-            ]);
-        } catch (GuzzleException $guzzleException) {
-            throw new MotorOccasionException('HTTP request failed for detail page: ' . $guzzleException->getMessage(), previous: $guzzleException);
-        }
-
-        if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not fetch detail page (HTTP ' . $response->getStatusCode() . ')');
-        }
-
-        $html = $response->getBody()->getContents();
+        $html = $this->fetchDetailHtml($result);
 
         return $this->parser->parseImagesFromDetailHtml($html);
     }
@@ -319,6 +291,30 @@ class MotorOccasion implements MotorOccasionInterface
 
         if ($response->getStatusCode() !== 200) {
             throw new MotorOccasionException('Could not fetch AJAX results from ' . $endpoint . ' (HTTP ' . $response->getStatusCode() . ')');
+        }
+
+        return $response->getBody()->getContents();
+    }
+
+    /**
+     * Fetch the HTML content of a listing detail page.
+     *
+     * @throws MotorOccasionException
+     */
+    private function fetchDetailHtml(Result $result): string
+    {
+        $this->ensureSession();
+
+        try {
+            $response = $this->httpClient->request('GET', $result->url, [
+                'cookies' => $this->cookieJar,
+            ]);
+        } catch (GuzzleException $guzzleException) {
+            throw new MotorOccasionException('HTTP request failed for detail page: ' . $guzzleException->getMessage(), previous: $guzzleException);
+        }
+
+        if ($response->getStatusCode() !== 200) {
+            throw new MotorOccasionException('Could not fetch detail page (HTTP ' . $response->getStatusCode() . ')');
         }
 
         return $response->getBody()->getContents();

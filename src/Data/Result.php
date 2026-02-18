@@ -9,6 +9,9 @@ use ValueError;
 
 readonly class Result
 {
+    /**
+     * @param string[] $images
+     */
     public function __construct(
         public string $brand,
         public string $model,
@@ -22,11 +25,12 @@ readonly class Result
         public ?int $id = null,
         public ?int $originalPrice = null,
         public ?int $monthlyLease = null,
+        public array $images = [],
     ) {
     }
 
     /**
-     * @param array{brand: string, model: string, price: int, year: int, odometerReading: int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string}, id?: ?int, originalPrice?: ?int, monthlyLease?: ?int} $data
+     * @param array{brand: string, model: string, price: int, year: int, odometerReading: int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string}, id?: ?int, originalPrice?: ?int, monthlyLease?: ?int, images?: string[]} $data
      *
      * @throws MotorOccasionException
      */
@@ -54,11 +58,12 @@ readonly class Result
             id: $data['id'] ?? null,
             originalPrice: $data['originalPrice'] ?? null,
             monthlyLease: $data['monthlyLease'] ?? null,
+            images: $data['images'] ?? [],
         );
     }
 
     /**
-     * @return array{brand: string, model: string, price: int, year: int, odometerReading: int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address: ?string, city: ?string, phone: ?string}, id: ?int, originalPrice: ?int, monthlyLease: ?int}
+     * @return array{brand: string, model: string, price: int, year: int, odometerReading: int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address: ?string, city: ?string, phone: ?string}, id: ?int, originalPrice: ?int, monthlyLease: ?int, images: string[]}
      */
     public function toArray(): array
     {
@@ -75,6 +80,7 @@ readonly class Result
             'id' => $this->id,
             'originalPrice' => $this->originalPrice,
             'monthlyLease' => $this->monthlyLease,
+            'images' => $this->images,
         ];
     }
 }

@@ -198,6 +198,7 @@ class FactoryTest extends TestCase
         $this->assertSame(OdometerUnit::Kilometers, $result->odometerReadingUnit);
         $this->assertSame(12345, $result->id);
         $this->assertInstanceOf(Seller::class, $result->seller);
+        $this->assertSame(['https://www.motoroccasion.nl/fotos/12345/thumb.jpg'], $result->images);
     }
 
     public function test_result_factory_accepts_overrides(): void

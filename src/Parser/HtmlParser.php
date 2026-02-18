@@ -173,6 +173,22 @@ class HtmlParser
         return 0;
     }
 
+    /**
+     * Extract high-resolution image URLs from a detail page's HTML.
+     *
+     * Prefers data-src (1024x768) from gallery divs, falls back to img src (640x480).
+     *
+     * @return string[]
+     */
+    public function parseImagesFromDetailHtml(string $html): array
+    {
+        $doc = new DOMDocument(encoding: 'UTF-8');
+
+        @$doc->loadHTML($html);
+
+        return $this->extractGalleryImages($doc);
+    }
+
     public function parseDetailHtml(string $html, string $url): ListingDetail
     {
         $doc = new DOMDocument(encoding: 'UTF-8');
@@ -247,18 +263,7 @@ class HtmlParser
         }
 
         // Images
-        $images = [];
-        $gallery = $doc->getElementById('imageGallery');
-        if ($gallery !== null) {
-            $imgNodes = $gallery->getElementsByTagName('img');
-            /** @var DOMElement $imgNode */
-            foreach ($imgNodes as $imgNode) {
-                $src = $imgNode->getAttribute('src');
-                if ($src !== '') {
-                    $images[] = $src;
-                }
-            }
-        }
+        $images = $this->extractGalleryImages($doc);
 
         // Description
         $description = null;
@@ -314,6 +319,60 @@ class HtmlParser
             seller: $seller,
             id: $id,
         );
+    }
+
+    /**
+     * Extract high-resolution image URLs from the imageGallery element.
+     *
+     * Prefers data-src (1024x768) from gallery divs, falls back to img src (640x480).
+     *
+     * @return string[]
+     */
+    private function extractGalleryImages(DOMDocument $doc): array
+    {
+        $images = [];
+        $gallery = $doc->getElementById('imageGallery');
+
+        if ($gallery === null) {
+            return [];
+        }
+
+        foreach ($gallery->childNodes as $child) {
+            if (! $child instanceof DOMElement) {
+                continue;
+            }
+
+            // Gallery items are <div data-src="...high-res..." data-thumb="...thumb..."><img src="...medium..." /></div>
+            $dataSrc = $child->getAttribute('data-src');
+            if ($dataSrc !== '') {
+                $images[] = $dataSrc;
+
+                continue;
+            }
+
+            // Fall back to <img src> inside the child element
+            $imgNodes = $child->getElementsByTagName('img');
+            if ($imgNodes->length > 0) {
+                /** @var DOMElement $imgNode */
+                $imgNode = $imgNodes->item(0);
+                $src = $imgNode->getAttribute('src');
+                if ($src !== '') {
+                    $images[] = $src;
+                }
+
+                continue;
+            }
+
+            // Direct <img> elements (legacy/simplified HTML)
+            if ($child->tagName === 'img') {
+                $src = $child->getAttribute('src');
+                if ($src !== '') {
+                    $images[] = $src;
+                }
+            }
+        }
+
+        return $images;
     }
 
     /**
@@ -518,6 +577,7 @@ class HtmlParser
                 website: $website,
             ),
             id: $this->extractListingIdFromUrl($url),
+            images: $image !== '' ? [$image] : [],
         );
     }
 
@@ -690,6 +750,7 @@ class HtmlParser
             id: $this->extractListingIdFromUrl($url),
             originalPrice: $originalPrice,
             monthlyLease: $monthlyLease,
+            images: $image !== '' ? [$image] : [],
         );
     }
 

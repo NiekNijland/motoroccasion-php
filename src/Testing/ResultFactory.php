@@ -10,6 +10,9 @@ use NiekNijland\MotorOccasion\Data\Seller;
 
 class ResultFactory
 {
+    /**
+     * @param string[] $images
+     */
     public static function make(
         string $brand = 'BMW',
         string $model = 'R 1250 GS',
@@ -23,6 +26,7 @@ class ResultFactory
         ?int $id = 12345,
         ?int $originalPrice = null,
         ?int $monthlyLease = null,
+        array $images = [],
     ): Result {
         return new Result(
             brand: $brand,
@@ -37,6 +41,7 @@ class ResultFactory
             id: $id,
             originalPrice: $originalPrice,
             monthlyLease: $monthlyLease,
+            images: $images !== [] ? $images : ($image !== '' ? [$image] : []),
         );
     }
 

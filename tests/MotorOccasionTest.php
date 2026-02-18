@@ -375,11 +375,11 @@ class MotorOccasionTest extends TestCase
         $this->assertSame(LicenseCategory::A, $detail->license);
         $this->assertTrue($detail->warranty);
 
-        // Images
+        // Images — should prefer data-src (high-resolution) over img src
         $this->assertCount(3, $detail->images);
-        $this->assertSame('https://www.motoroccasion.nl/fotos/99999/photo1.jpg', $detail->images[0]);
-        $this->assertSame('https://www.motoroccasion.nl/fotos/99999/photo2.jpg', $detail->images[1]);
-        $this->assertSame('https://www.motoroccasion.nl/fotos/99999/photo3.jpg', $detail->images[2]);
+        $this->assertSame('https://www.motoroccasion.nl/fotos/99999/photo1_large.jpg', $detail->images[0]);
+        $this->assertSame('https://www.motoroccasion.nl/fotos/99999/photo2_large.jpg', $detail->images[1]);
+        $this->assertSame('https://www.motoroccasion.nl/fotos/99999/photo3_large.jpg', $detail->images[2]);
 
         // Description
         $this->assertSame('Dit is een prachtige BMW R 4 uit 1936 in uitstekende staat.', $detail->description);
@@ -401,6 +401,35 @@ class MotorOccasionTest extends TestCase
         $this->assertSame('Nobelweg 4', $detail->seller->address);
         $this->assertSame('Goes', $detail->seller->city);
         $this->assertSame('0113-231640', $detail->seller->phone);
+    }
+
+    public function test_get_images_returns_high_resolution_images(): void
+    {
+        $mock = new MockHandler([
+            $this->sessionResponse(),
+            $this->okResponse($this->detailFixture()), // GET detail page
+        ]);
+
+        $client = new MotorOccasion($this->createClientWithMock($mock));
+
+        $result = new Result(
+            brand: 'BMW',
+            model: 'R 4',
+            price: 12500,
+            year: 1936,
+            odometerReading: 60949,
+            odometerReadingUnit: OdometerUnit::Kilometers,
+            image: 'https://www.motoroccasion.nl/fotos/99999/thumb.jpg',
+            url: 'https://www.motoroccasion.nl/motor/99999/bmw-r-4',
+            seller: new Seller(name: 'MotoPort Goes', province: null, website: ''),
+        );
+
+        $images = $client->getImages($result);
+
+        $this->assertCount(3, $images);
+        $this->assertSame('https://www.motoroccasion.nl/fotos/99999/photo1_large.jpg', $images[0]);
+        $this->assertSame('https://www.motoroccasion.nl/fotos/99999/photo2_large.jpg', $images[1]);
+        $this->assertSame('https://www.motoroccasion.nl/fotos/99999/photo3_large.jpg', $images[2]);
     }
 
     public function test_get_offers_parses_big_tile_listings(): void

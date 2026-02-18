@@ -53,6 +53,20 @@ interface MotorOccasionInterface
     public function getDetail(Result $result): ListingDetail;
 
     /**
+     * Fetch high-resolution image URLs for a listing.
+     *
+     * Loads the detail page and extracts all gallery images at the highest
+     * available resolution (typically 1024x768). This is useful when you
+     * need high-quality images from search results without fetching the
+     * full listing detail.
+     *
+     * @return string[]
+     *
+     * @throws MotorOccasionException
+     */
+    public function getImages(Result $result): array;
+
+    /**
      * Force a fresh session on the next request.
      */
     public function resetSession(): void;

@@ -239,6 +239,39 @@ class MotorOccasion implements MotorOccasionInterface
     }
 
     /**
+     * Fetch high-resolution image URLs for a listing.
+     *
+     * Loads the detail page and extracts all gallery images at the highest
+     * available resolution (typically 1024x768). This is useful when you
+     * need high-quality images from search results without fetching the
+     * full listing detail.
+     *
+     * @return string[]
+     *
+     * @throws MotorOccasionException
+     */
+    public function getImages(Result $result): array
+    {
+        $this->ensureSession();
+
+        try {
+            $response = $this->httpClient->request('GET', $result->url, [
+                'cookies' => $this->cookieJar,
+            ]);
+        } catch (GuzzleException $guzzleException) {
+            throw new MotorOccasionException('HTTP request failed for detail page: ' . $guzzleException->getMessage(), previous: $guzzleException);
+        }
+
+        if ($response->getStatusCode() !== 200) {
+            throw new MotorOccasionException('Could not fetch detail page (HTTP ' . $response->getStatusCode() . ')');
+        }
+
+        $html = $response->getBody()->getContents();
+
+        return $this->parser->parseImagesFromDetailHtml($html);
+    }
+
+    /**
      * Force a fresh session on the next request.
      *
      * Clears in-memory state and invalidates cached brands/categories

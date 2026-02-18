@@ -209,6 +209,23 @@ class FakeMotorOccasion implements MotorOccasionInterface
         return $this->details[$result->url];
     }
 
+    /**
+     * @return string[]
+     *
+     * @throws MotorOccasionException
+     */
+    public function getImages(Result $result): array
+    {
+        $this->recordCall('getImages', ['result' => $result]);
+        $this->throwIfConfigured();
+
+        if (! isset($this->details[$result->url])) {
+            throw new MotorOccasionException('No fake detail configured for URL: ' . $result->url);
+        }
+
+        return $this->details[$result->url]->images;
+    }
+
     public function resetSession(): void
     {
         $this->recordCall('resetSession');

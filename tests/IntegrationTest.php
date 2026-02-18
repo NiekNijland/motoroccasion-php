@@ -48,6 +48,9 @@ class IntegrationTest extends TestCase
 
     private static ?ListingDetail $detail = null;
 
+    /** @var string[]|null */
+    private static ?array $images = null;
+
     private static ?Brand $bmwBrand = null;
 
     private static ?SearchResult $sortedByPriceResult = null;
@@ -81,6 +84,8 @@ class IntegrationTest extends TestCase
             // 4. Fetch detail for first search result (reuses searchClient session)
             if (self::$searchResult->results !== []) {
                 self::$detail = $searchClient->getDetail(self::$searchResult->results[0]);
+                // 4b. Fetch images for the same result (reuses searchClient session)
+                self::$images = $searchClient->getImages(self::$searchResult->results[0]);
             }
         }
 
@@ -114,6 +119,7 @@ class IntegrationTest extends TestCase
         self::$searchResult = null;
         self::$offersResult = null;
         self::$detail = null;
+        self::$images = null;
         self::$bmwBrand = null;
         self::$sortedByPriceResult = null;
         self::$sortedByYearDescResult = null;
@@ -333,6 +339,49 @@ class IntegrationTest extends TestCase
 
         $this->assertGreaterThan(0, self::$detail->price, 'Detail price should be > 0');
         $this->assertGreaterThan(0, self::$detail->year, 'Detail year should be > 0');
+    }
+
+    // --- Images ---
+
+    public function test_get_images_returns_high_resolution_urls(): void
+    {
+        $this->assertNotNull(self::$images, 'Images could not be fetched (no search results?)');
+        $this->assertNotEmpty(self::$images, 'Expected at least one image from getImages()');
+
+        foreach (self::$images as $image) {
+            $this->assertIsString($image);
+            $this->assertNotEmpty($image, 'Image URL should not be empty');
+            $this->assertStringStartsWith('https://', $image, 'Image URL should be absolute HTTPS');
+        }
+    }
+
+    public function test_get_images_matches_detail_images(): void
+    {
+        $this->assertNotNull(self::$images, 'Images could not be fetched');
+        $this->assertNotNull(self::$detail, 'Detail could not be fetched');
+
+        $this->assertSame(
+            count(self::$detail->images),
+            count(self::$images),
+            'getImages() should return the same number of images as getDetail()->images',
+        );
+
+        $this->assertSame(
+            self::$detail->images,
+            self::$images,
+            'getImages() should return identical URLs to getDetail()->images',
+        );
+    }
+
+    public function test_search_results_have_images_array(): void
+    {
+        $this->assertNotNull(self::$searchResult);
+
+        foreach (self::$searchResult->results as $result) {
+            $this->assertIsArray($result->images, 'Result should have images array');
+            $this->assertNotEmpty($result->images, 'Result images array should contain the thumbnail');
+            $this->assertSame($result->image, $result->images[0], 'First image in array should match the thumbnail');
+        }
     }
 
     // --- Sort order ---

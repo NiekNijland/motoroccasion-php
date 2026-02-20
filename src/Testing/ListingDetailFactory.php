@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace NiekNijland\MotorOccasion\Testing;
 
+use NiekNijland\MotorOccasion\Data\Chassis;
+use NiekNijland\MotorOccasion\Data\Dimensions;
+use NiekNijland\MotorOccasion\Data\Engine;
 use NiekNijland\MotorOccasion\Data\LicenseCategory;
 use NiekNijland\MotorOccasion\Data\ListingDetail;
 use NiekNijland\MotorOccasion\Data\OdometerUnit;
+use NiekNijland\MotorOccasion\Data\PriceType;
 use NiekNijland\MotorOccasion\Data\Seller;
 
 class ListingDetailFactory
@@ -18,7 +22,8 @@ class ListingDetailFactory
     public static function make(
         string $brand = 'BMW',
         string $model = 'R 1250 GS',
-        int $price = 18950,
+        ?int $askingPrice = 18950,
+        PriceType $priceType = PriceType::Asking,
         ?int $originalPrice = null,
         ?int $monthlyLease = null,
         int $year = 2021,
@@ -33,12 +38,26 @@ class ListingDetailFactory
         array $specifications = [],
         string $url = 'https://www.motoroccasion.nl/motor/12345/bmw-r-1250-gs',
         ?Seller $seller = null,
+        ?Engine $engine = null,
+        ?Chassis $chassis = null,
+        ?Dimensions $dimensions = null,
         ?int $id = 12345,
+        ?bool $vatDeductible = null,
+        ?string $licensePlate = null,
+        ?string $damageStatus = null,
+        ?string $bodyType = null,
+        ?string $roadTaxStatus = null,
+        ?string $availableColors = null,
+        ?bool $isNew = null,
+        ?int $modelYear = null,
+        ?int $factoryWarrantyMonths = null,
+        ?string $dealerDescription = null,
     ): ListingDetail {
         return new ListingDetail(
             brand: $brand,
             model: $model,
-            price: $price,
+            askingPrice: $askingPrice,
+            priceType: $priceType,
             originalPrice: $originalPrice,
             monthlyLease: $monthlyLease,
             year: $year,
@@ -60,7 +79,20 @@ class ListingDetailFactory
             ],
             url: $url,
             seller: $seller ?? SellerFactory::makeDealer(),
+            engine: $engine ?? new Engine(),
+            chassis: $chassis ?? new Chassis(),
+            dimensions: $dimensions ?? new Dimensions(),
             id: $id,
+            vatDeductible: $vatDeductible,
+            licensePlate: $licensePlate,
+            damageStatus: $damageStatus,
+            bodyType: $bodyType,
+            roadTaxStatus: $roadTaxStatus,
+            availableColors: $availableColors,
+            isNew: $isNew,
+            modelYear: $modelYear,
+            factoryWarrantyMonths: $factoryWarrantyMonths,
+            dealerDescription: $dealerDescription,
         );
     }
 }

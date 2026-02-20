@@ -15,7 +15,8 @@ readonly class Result
     public function __construct(
         public string $brand,
         public string $model,
-        public int $price,
+        public ?int $askingPrice,
+        public PriceType $priceType,
         public int $year,
         public int $odometerReading,
         public OdometerUnit $odometerReadingUnit,
@@ -30,7 +31,7 @@ readonly class Result
     }
 
     /**
-     * @param array{brand: string, model: string, price: int, year: int, odometerReading: int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string}, id?: ?int, originalPrice?: ?int, monthlyLease?: ?int, images?: string[]} $data
+     * @param array{brand: string, model: string, askingPrice: ?int, priceType: string, year: int, odometerReading: int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string}, id?: ?int, originalPrice?: ?int, monthlyLease?: ?int, images?: string[]} $data
      *
      * @throws MotorOccasionException
      */
@@ -45,10 +46,20 @@ readonly class Result
             );
         }
 
+        try {
+            $priceType = PriceType::from($data['priceType']);
+        } catch (ValueError $valueError) {
+            throw new MotorOccasionException(
+                'Invalid price type: ' . $data['priceType'],
+                previous: $valueError,
+            );
+        }
+
         return new self(
             brand: $data['brand'],
             model: $data['model'],
-            price: $data['price'],
+            askingPrice: $data['askingPrice'],
+            priceType: $priceType,
             year: $data['year'],
             odometerReading: $data['odometerReading'],
             odometerReadingUnit: $odometerUnit,
@@ -63,14 +74,15 @@ readonly class Result
     }
 
     /**
-     * @return array{brand: string, model: string, price: int, year: int, odometerReading: int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address: ?string, city: ?string, phone: ?string}, id: ?int, originalPrice: ?int, monthlyLease: ?int, images: string[]}
+     * @return array{brand: string, model: string, askingPrice: ?int, priceType: string, year: int, odometerReading: int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address: ?string, city: ?string, phone: ?string}, id: ?int, originalPrice: ?int, monthlyLease: ?int, images: string[]}
      */
     public function toArray(): array
     {
         return [
             'brand' => $this->brand,
             'model' => $this->model,
-            'price' => $this->price,
+            'askingPrice' => $this->askingPrice,
+            'priceType' => $this->priceType->value,
             'year' => $this->year,
             'odometerReading' => $this->odometerReading,
             'odometerReadingUnit' => $this->odometerReadingUnit->value,

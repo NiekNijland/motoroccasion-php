@@ -13,11 +13,12 @@ readonly class Seller
         public ?string $address = null,
         public ?string $city = null,
         public ?string $phone = null,
+        public ?string $postalCode = null,
     ) {
     }
 
     /**
-     * @param array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string} $data
+     * @param array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string, postalCode?: ?string} $data
      */
     public static function fromArray(array $data): self
     {
@@ -30,11 +31,12 @@ readonly class Seller
             address: $data['address'] ?? null,
             city: $data['city'] ?? null,
             phone: $data['phone'] ?? null,
+            postalCode: $data['postalCode'] ?? null,
         );
     }
 
     /**
-     * @return array{name: string, province: ?string, website: string, address: ?string, city: ?string, phone: ?string}
+     * @return array{name: string, province: ?string, website: string, address: ?string, city: ?string, phone: ?string, postalCode: ?string}
      */
     public function toArray(): array
     {
@@ -45,6 +47,7 @@ readonly class Seller
             'address' => $this->address,
             'city' => $this->city,
             'phone' => $this->phone,
+            'postalCode' => $this->postalCode,
         ];
     }
 }

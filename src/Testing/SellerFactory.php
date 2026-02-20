@@ -16,6 +16,7 @@ class SellerFactory
         ?string $address = null,
         ?string $city = null,
         ?string $phone = null,
+        ?string $postalCode = null,
     ): Seller {
         return new Seller(
             name: $name,
@@ -24,6 +25,7 @@ class SellerFactory
             address: $address,
             city: $city,
             phone: $phone,
+            postalCode: $postalCode,
         );
     }
 
@@ -34,6 +36,7 @@ class SellerFactory
         string $address = 'Nobelweg 4',
         string $city = 'Goes',
         string $phone = '0113-231640',
+        ?string $postalCode = '4461 ZM',
     ): Seller {
         return new Seller(
             name: $name,
@@ -42,6 +45,7 @@ class SellerFactory
             address: $address,
             city: $city,
             phone: $phone,
+            postalCode: $postalCode,
         );
     }
 

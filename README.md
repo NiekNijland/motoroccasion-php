@@ -33,7 +33,7 @@ $results = $client->search(new SearchCriteria(brand: $yamaha, type: $mt07));
 echo "{$results->totalCount} motorcycles found\n";
 
 foreach ($results->results as $listing) {
-    echo "{$listing->brand} {$listing->model} - EUR {$listing->price} ({$listing->year})\n";
+    echo "{$listing->brand} {$listing->model} - EUR {$listing->askingPrice} ({$listing->year})\n";
     // BMW R 1250 GS Adventure - EUR 18950 (2021)
 }
 ```
@@ -167,7 +167,8 @@ foreach ($results->results as $listing) {
     $listing->id;                  // 12345 (numeric listing ID, or null)
     $listing->brand;               // "YAMAHA"
     $listing->model;               // "MT 07"
-    $listing->price;               // 6450 (EUR, int)
+    $listing->askingPrice;         // 6450 (EUR, or null for "prijs op aanvraag")
+    $listing->priceType;           // PriceType::Asking (Asking, OnRequest, Negotiable, Bidding)
     $listing->year;                // 2019
     $listing->odometerReading;     // 23500
     $listing->odometerReadingUnit; // OdometerUnit::Kilometers
@@ -191,7 +192,8 @@ $detail = $client->getDetail($listing);
 $detail->id;               // 12345 (numeric listing ID, or null)
 $detail->brand;            // "YAMAHA"
 $detail->model;            // "MT 07"
-$detail->price;            // 6450
+$detail->askingPrice;      // 6450 (EUR, or null for "prijs op aanvraag")
+$detail->priceType;        // PriceType::Asking
 $detail->originalPrice;    // 7200 (or null)
 $detail->monthlyLease;     // 134 (EUR/month, or null)
 $detail->year;             // 2019
@@ -205,12 +207,66 @@ $detail->images;           // ["https://...photo1.jpg", "https://...photo2.jpg",
 $detail->description;      // "Mooie MT-07 in perfecte staat..."
 $detail->specifications;   // ["Merk" => "YAMAHA", "Model" => "MT 07", "Cilinderinhoud" => "689 cc", ...]
 $detail->url;              // "/motor/12345/yamaha-mt-07"
-$detail->seller->name;     // "Goedhart Motoren"
-$detail->seller->website;  // "https://www.goedhart.nl"
-$detail->seller->address;  // "Industrieweg 12"
-$detail->seller->city;     // "Gouda"
-$detail->seller->phone;    // "0182-123456"
+
+// Engine sub-DTO (all fields nullable)
+$detail->engine->capacityCc;      // 755 (engine displacement in cc)
+$detail->engine->type;            // "Vloeistofgekoelde 4-takt paralleltwin"
+$detail->engine->cylinders;       // 2
+$detail->engine->valves;          // 8
+$detail->engine->boreAndStroke;   // "87 mm x 87 mm"
+$detail->engine->compressionRatio; // "11.0:1"
+$detail->engine->fuelDelivery;    // "PGM-FI elektronische benzine injectie"
+$detail->engine->fuelType;        // "Benzine"
+$detail->engine->isElectric;      // false
+$detail->engine->ignition;        // "Computergestuurde digitale transistor..."
+$detail->engine->maxTorque;       // "75 Nm bij 7250 tpm"
+$detail->engine->clutch;          // "Natte meerplaatskoppeling"
+$detail->engine->gearbox;         // "6 versnellingen, manuele koppeling"
+$detail->engine->driveType;       // "Ketting" (Ketting/Kardan/Riem)
+$detail->engine->starter;         // "electrisch"
+$detail->engine->topSpeed;        // "200 km/h"
+
+// Chassis sub-DTO (all fields nullable)
+$detail->chassis->abs;             // true
+$detail->chassis->frameType;       // "Stalen buizenframe, diamant type"
+$detail->chassis->frontSuspension; // "Showa 43 mm SFF-CA USD, 190 mm veerweg"
+$detail->chassis->rearSuspension;  // "Pro-Link swingarm, 190 mm veerweg"
+$detail->chassis->frontBrake;      // "Dubbele remschijf 310 x 4,5 mm..."
+$detail->chassis->rearBrake;       // "enkelvoudige remschijf 256 x 6,0 mm..."
+$detail->chassis->frontTire;       // "90/90-21"
+$detail->chassis->rearTire;        // "150/70-18"
+
+// Dimensions sub-DTO (all fields nullable)
+$detail->dimensions->seatHeightMm;     // 830 (mm)
+$detail->dimensions->wheelbaseMm;      // 1535 (mm)
+$detail->dimensions->lengthMm;         // 2325 (mm)
+$detail->dimensions->widthMm;          // 838 (mm)
+$detail->dimensions->heightMm;         // 1450 (mm)
+$detail->dimensions->tankCapacityLiters; // 16.9 (liters)
+$detail->dimensions->weightKg;         // 208 (dry weight in kg)
+
+// Listing-level fields (all nullable)
+$detail->vatDeductible;          // false (VAT deductible)
+$detail->licensePlate;           // "AB-123-CD" (Dutch license plate)
+$detail->damageStatus;           // "schadevrij"
+$detail->bodyType;               // "Naked"
+$detail->roadTaxStatus;          // "Vrijgesteld"
+$detail->availableColors;        // "Ross White Metallic, Mat Ballistic Black"
+$detail->isNew;                  // true
+$detail->modelYear;              // 2025 (distinct from build year)
+$detail->factoryWarrantyMonths;  // 72 (factory warranty in months)
+$detail->dealerDescription;      // "Voor kwaliteit en betrouwbaarheid..."
+
+// Seller details
+$detail->seller->name;       // "MotoPort Goes"
+$detail->seller->website;    // "https://www.motoport.nl/goes"
+$detail->seller->address;    // "Nobelweg 4"
+$detail->seller->city;       // "Goes"
+$detail->seller->phone;      // "0113-231640"
+$detail->seller->postalCode; // "4462 GK" (Dutch postal code, or null)
 ```
+
+Structured fields are extracted from both the technical specifications table and key-value pairs in descriptions. Data from both sources is merged -- description values take precedence over tech table values for the same field. Not all listings contain these details -- when absent, fields are `null`. The raw `specifications` array and `description` remain available as fallback.
 
 ### Special offers
 
@@ -283,6 +339,31 @@ LicenseCategory::B;   // "B"  - trikes/quads (car license)
 $results = $client->search(new SearchCriteria(license: LicenseCategory::A2));
 ```
 
+### PriceType enum
+
+Listings can have different pricing models. The `PriceType` enum indicates how to interpret the `askingPrice` field.
+
+```php
+use NiekNijland\MotorOccasion\Data\PriceType;
+
+$listing->priceType;          // PriceType::Asking
+$listing->priceType->value;   // "asking"
+
+// Available cases
+PriceType::Asking;      // "asking"     - regular asking price (askingPrice is set)
+PriceType::OnRequest;   // "on_request" - "prijs op aanvraag" (askingPrice is null)
+PriceType::Negotiable;  // "negotiable" - "n.o.t.k." (askingPrice is null)
+PriceType::Bidding;     // "bidding"    - open for bids (askingPrice is null)
+
+// Handle different price types
+match ($listing->priceType) {
+    PriceType::Asking     => "€ {$listing->askingPrice}",
+    PriceType::OnRequest  => 'Prijs op aanvraag',
+    PriceType::Negotiable => 'Nader overeen te komen',
+    PriceType::Bidding    => 'Bieden',
+};
+```
+
 ### SortOrder enum
 
 Control the order of search results and offers with the `SortOrder` enum.
@@ -316,7 +397,7 @@ All DTOs support `toArray()` and `fromArray()` for serialization (e.g. caching o
 
 ```php
 $array = $listing->toArray();
-// ['brand' => 'YAMAHA', 'model' => 'MT 07', 'price' => 6450, 'odometerReadingUnit' => 'KM', 'seller' => ['name' => '...', ...], ...]
+// ['brand' => 'YAMAHA', 'model' => 'MT 07', 'askingPrice' => 6450, 'priceType' => 'asking', 'odometerReadingUnit' => 'KM', 'seller' => ['name' => '...', ...], ...]
 
 $restored = Result::fromArray($array);
 
@@ -447,7 +528,7 @@ use NiekNijland\MotorOccasion\Testing\SellerFactory;
 $result = ResultFactory::make();
 
 // Override specific fields
-$result = ResultFactory::make(brand: 'Honda', price: 5000, year: 2023);
+$result = ResultFactory::make(brand: 'Honda', askingPrice: 5000, year: 2023);
 
 // Generate multiple
 $results = ResultFactory::makeMany(10);
@@ -470,6 +551,9 @@ Available factories:
 | `SellerFactory` | `make()`, `makeDealer()`, `makePrivate()` | De Motor Shop |
 | `ResultFactory` | `make()`, `makeMany()` | BMW R 1250 GS, EUR 18,950 |
 | `ListingDetailFactory` | `make()` | BMW R 1250 GS with full specs |
+| `EngineFactory` | `make()` | All fields null |
+| `ChassisFactory` | `make()` | All fields null |
+| `DimensionsFactory` | `make()` | All fields null |
 
 ## License
 

@@ -6,15 +6,22 @@ namespace NiekNijland\MotorOccasion\Tests\Testing;
 
 use NiekNijland\MotorOccasion\Data\Brand;
 use NiekNijland\MotorOccasion\Data\Category;
+use NiekNijland\MotorOccasion\Data\Chassis;
+use NiekNijland\MotorOccasion\Data\Dimensions;
+use NiekNijland\MotorOccasion\Data\Engine;
 use NiekNijland\MotorOccasion\Data\LicenseCategory;
 use NiekNijland\MotorOccasion\Data\ListingDetail;
 use NiekNijland\MotorOccasion\Data\OdometerUnit;
+use NiekNijland\MotorOccasion\Data\PriceType;
 use NiekNijland\MotorOccasion\Data\Province;
 use NiekNijland\MotorOccasion\Data\Result;
 use NiekNijland\MotorOccasion\Data\Seller;
 use NiekNijland\MotorOccasion\Data\Type;
 use NiekNijland\MotorOccasion\Testing\BrandFactory;
 use NiekNijland\MotorOccasion\Testing\CategoryFactory;
+use NiekNijland\MotorOccasion\Testing\ChassisFactory;
+use NiekNijland\MotorOccasion\Testing\DimensionsFactory;
+use NiekNijland\MotorOccasion\Testing\EngineFactory;
 use NiekNijland\MotorOccasion\Testing\ListingDetailFactory;
 use NiekNijland\MotorOccasion\Testing\ResultFactory;
 use NiekNijland\MotorOccasion\Testing\SellerFactory;
@@ -192,7 +199,8 @@ class FactoryTest extends TestCase
         $this->assertInstanceOf(Result::class, $result);
         $this->assertSame('BMW', $result->brand);
         $this->assertSame('R 1250 GS', $result->model);
-        $this->assertSame(18950, $result->price);
+        $this->assertSame(18950, $result->askingPrice);
+        $this->assertSame(PriceType::Asking, $result->priceType);
         $this->assertSame(2021, $result->year);
         $this->assertSame(25000, $result->odometerReading);
         $this->assertSame(OdometerUnit::Kilometers, $result->odometerReadingUnit);
@@ -206,13 +214,14 @@ class FactoryTest extends TestCase
         $result = ResultFactory::make(
             brand: 'Honda',
             model: 'CB650R',
-            price: 8200,
+            askingPrice: 8200,
             originalPrice: 9000,
         );
 
         $this->assertSame('Honda', $result->brand);
         $this->assertSame('CB650R', $result->model);
-        $this->assertSame(8200, $result->price);
+        $this->assertSame(8200, $result->askingPrice);
+        $this->assertSame(PriceType::Asking, $result->priceType);
         $this->assertSame(9000, $result->originalPrice);
     }
 
@@ -251,7 +260,8 @@ class FactoryTest extends TestCase
         $this->assertInstanceOf(ListingDetail::class, $detail);
         $this->assertSame('BMW', $detail->brand);
         $this->assertSame('R 1250 GS', $detail->model);
-        $this->assertSame(18950, $detail->price);
+        $this->assertSame(18950, $detail->askingPrice);
+        $this->assertSame(PriceType::Asking, $detail->priceType);
         $this->assertSame(2021, $detail->year);
         $this->assertSame(OdometerUnit::Kilometers, $detail->odometerReadingUnit);
         $this->assertSame('ZWART', $detail->color);
@@ -269,14 +279,15 @@ class FactoryTest extends TestCase
         $detail = ListingDetailFactory::make(
             brand: 'Honda',
             model: 'CB500F',
-            price: 5000,
+            askingPrice: 5000,
             color: null,
             license: LicenseCategory::A2,
             warranty: false,
         );
 
         $this->assertSame('Honda', $detail->brand);
-        $this->assertSame(5000, $detail->price);
+        $this->assertSame(5000, $detail->askingPrice);
+        $this->assertSame(PriceType::Asking, $detail->priceType);
         $this->assertNull($detail->color);
         $this->assertSame(LicenseCategory::A2, $detail->license);
         $this->assertFalse($detail->warranty);
@@ -301,9 +312,111 @@ class FactoryTest extends TestCase
         $restored = ListingDetail::fromArray($array);
 
         $this->assertSame($detail->brand, $restored->brand);
-        $this->assertSame($detail->price, $restored->price);
+        $this->assertSame($detail->askingPrice, $restored->askingPrice);
+        $this->assertSame($detail->priceType, $restored->priceType);
         $this->assertSame($detail->id, $restored->id);
         $this->assertSame($detail->license, $restored->license);
         $this->assertSame($detail->odometerReadingUnit, $restored->odometerReadingUnit);
+    }
+
+    public function test_listing_detail_factory_accepts_sub_dto_overrides(): void
+    {
+        $engine = EngineFactory::make(capacityCc: 1254, cylinders: 4);
+        $chassis = ChassisFactory::make(abs: true, frameType: 'Aluminium');
+        $dimensions = DimensionsFactory::make(seatHeightMm: 850, weightKg: 249);
+
+        $detail = ListingDetailFactory::make(
+            engine: $engine,
+            chassis: $chassis,
+            dimensions: $dimensions,
+        );
+
+        $this->assertSame(1254, $detail->engine->capacityCc);
+        $this->assertSame(4, $detail->engine->cylinders);
+        $this->assertTrue($detail->chassis->abs);
+        $this->assertSame('Aluminium', $detail->chassis->frameType);
+        $this->assertSame(249, $detail->dimensions->weightKg);
+        $this->assertSame(850, $detail->dimensions->seatHeightMm);
+    }
+
+    // --- EngineFactory ---
+
+    public function test_engine_factory_creates_default_engine(): void
+    {
+        $engine = EngineFactory::make();
+
+        $this->assertInstanceOf(Engine::class, $engine);
+        $this->assertNull($engine->capacityCc);
+        $this->assertNull($engine->type);
+        $this->assertNull($engine->cylinders);
+    }
+
+    public function test_engine_factory_accepts_overrides(): void
+    {
+        $engine = EngineFactory::make(
+            capacityCc: 755,
+            type: 'Paralleltwin',
+            cylinders: 2,
+            fuelType: 'Benzine',
+            isElectric: false,
+        );
+
+        $this->assertSame(755, $engine->capacityCc);
+        $this->assertSame('Paralleltwin', $engine->type);
+        $this->assertSame(2, $engine->cylinders);
+        $this->assertSame('Benzine', $engine->fuelType);
+        $this->assertFalse($engine->isElectric);
+    }
+
+    // --- ChassisFactory ---
+
+    public function test_chassis_factory_creates_default_chassis(): void
+    {
+        $chassis = ChassisFactory::make();
+
+        $this->assertInstanceOf(Chassis::class, $chassis);
+        $this->assertNull($chassis->abs);
+        $this->assertNull($chassis->frameType);
+    }
+
+    public function test_chassis_factory_accepts_overrides(): void
+    {
+        $chassis = ChassisFactory::make(
+            abs: true,
+            frameType: 'Stalen buizenframe',
+            frontTire: '120/70-17',
+            rearTire: '180/55-17',
+        );
+
+        $this->assertTrue($chassis->abs);
+        $this->assertSame('Stalen buizenframe', $chassis->frameType);
+        $this->assertSame('120/70-17', $chassis->frontTire);
+        $this->assertSame('180/55-17', $chassis->rearTire);
+    }
+
+    // --- DimensionsFactory ---
+
+    public function test_dimensions_factory_creates_default_dimensions(): void
+    {
+        $dimensions = DimensionsFactory::make();
+
+        $this->assertInstanceOf(Dimensions::class, $dimensions);
+        $this->assertNull($dimensions->seatHeightMm);
+        $this->assertNull($dimensions->weightKg);
+    }
+
+    public function test_dimensions_factory_accepts_overrides(): void
+    {
+        $dimensions = DimensionsFactory::make(
+            seatHeightMm: 830,
+            wheelbaseMm: 1535,
+            tankCapacityLiters: 16.9,
+            weightKg: 208,
+        );
+
+        $this->assertSame(830, $dimensions->seatHeightMm);
+        $this->assertSame(1535, $dimensions->wheelbaseMm);
+        $this->assertSame(16.9, $dimensions->tankCapacityLiters);
+        $this->assertSame(208, $dimensions->weightKg);
     }
 }

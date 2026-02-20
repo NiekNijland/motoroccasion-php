@@ -9,6 +9,7 @@ use NiekNijland\MotorOccasion\Data\Category;
 use NiekNijland\MotorOccasion\Data\LicenseCategory;
 use NiekNijland\MotorOccasion\Data\ListingDetail;
 use NiekNijland\MotorOccasion\Data\OdometerUnit;
+use NiekNijland\MotorOccasion\Data\PriceType;
 use NiekNijland\MotorOccasion\Data\Result;
 use NiekNijland\MotorOccasion\Data\SearchCriteria;
 use NiekNijland\MotorOccasion\Data\SearchResult;
@@ -60,7 +61,7 @@ class IntegrationTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         // 1. Fetch brands and categories (shared session)
-        $client = new MotorOccasion();
+        $client = new MotorOccasion;
         self::$brands = $client->getBrands();
         self::$categories = $client->getCategories();
 
@@ -77,9 +78,9 @@ class IntegrationTest extends TestCase
         // 3. BMW-filtered search (reliable even under rate-limiting,
         //    since setSessionParam calls always trigger result generation)
         if (self::$bmwBrand instanceof Brand) {
-            $typesClient = new MotorOccasion();
+            $typesClient = new MotorOccasion;
             self::$bmwTypes = $typesClient->getTypesForBrand(self::$bmwBrand);
-            $searchClient = new MotorOccasion();
+            $searchClient = new MotorOccasion;
             self::$searchResult = $searchClient->search(new SearchCriteria(brand: self::$bmwBrand, perPage: 10));
             // 4. Fetch detail for first search result (reuses searchClient session)
             if (self::$searchResult->results !== []) {
@@ -90,19 +91,19 @@ class IntegrationTest extends TestCase
         }
 
         // 5. Offers (separate endpoint, not affected by search rate-limiting)
-        $offersClient = new MotorOccasion();
+        $offersClient = new MotorOccasion;
         self::$offersResult = $offersClient->getOffers(perPage: 10);
 
         // 6. Sorted searches (verify sort order params work against live site)
         if (self::$bmwBrand instanceof Brand) {
-            $sortedPriceClient = new MotorOccasion();
+            $sortedPriceClient = new MotorOccasion;
             self::$sortedByPriceResult = $sortedPriceClient->search(new SearchCriteria(
                 brand: self::$bmwBrand,
                 sortOrder: SortOrder::PriceAscending,
                 perPage: 10,
             ));
 
-            $sortedYearClient = new MotorOccasion();
+            $sortedYearClient = new MotorOccasion;
             self::$sortedByYearDescResult = $sortedYearClient->search(new SearchCriteria(
                 brand: self::$bmwBrand,
                 sortOrder: SortOrder::YearDescending,
@@ -269,7 +270,9 @@ class IntegrationTest extends TestCase
             $this->assertInstanceOf(Result::class, $result);
             $this->assertNotEmpty($result->brand, 'Offer brand should not be empty');
             $this->assertNotEmpty($result->url, 'Offer URL should not be empty');
-            $this->assertGreaterThan(0, $result->price, 'Offer price should be > 0');
+            $this->assertNotNull($result->askingPrice, 'Offer asking price should not be null');
+            $this->assertGreaterThan(0, $result->askingPrice, 'Offer asking price should be > 0');
+            $this->assertSame(PriceType::Asking, $result->priceType, 'Offer price type should be Asking');
             $this->assertInstanceOf(OdometerUnit::class, $result->odometerReadingUnit);
             $this->assertInstanceOf(Seller::class, $result->seller);
         }
@@ -337,7 +340,9 @@ class IntegrationTest extends TestCase
     {
         $this->assertNotNull(self::$detail, 'Detail could not be fetched');
 
-        $this->assertGreaterThan(0, self::$detail->price, 'Detail price should be > 0');
+        $this->assertNotNull(self::$detail->askingPrice, 'Detail asking price should not be null');
+        $this->assertGreaterThan(0, self::$detail->askingPrice, 'Detail asking price should be > 0');
+        $this->assertInstanceOf(PriceType::class, self::$detail->priceType);
         $this->assertGreaterThan(0, self::$detail->year, 'Detail year should be > 0');
     }
 
@@ -398,8 +403,13 @@ class IntegrationTest extends TestCase
         $this->assertNotNull(self::$sortedByPriceResult);
         $this->assertCount(10, self::$sortedByPriceResult->results, 'Expected 10 results');
 
-        $prices = array_map(fn (Result $r): int => $r->price, self::$sortedByPriceResult->results);
+        $prices = array_values(array_filter(
+            array_map(fn (Result $r): ?int => $r->askingPrice, self::$sortedByPriceResult->results),
+            fn (?int $p): bool => $p !== null,
+        ));
         $counter = count($prices);
+
+        $this->assertGreaterThan(0, $counter, 'Expected at least one result with a non-null price');
 
         for ($i = 1; $i < $counter; $i++) {
             $this->assertGreaterThanOrEqual(
@@ -446,7 +456,8 @@ class IntegrationTest extends TestCase
 
             $this->assertSame($result->brand, $reconstructed->brand);
             $this->assertSame($result->model, $reconstructed->model);
-            $this->assertSame($result->price, $reconstructed->price);
+            $this->assertSame($result->askingPrice, $reconstructed->askingPrice);
+            $this->assertSame($result->priceType, $reconstructed->priceType);
             $this->assertSame($result->year, $reconstructed->year);
             $this->assertSame($result->url, $reconstructed->url);
             $this->assertSame($result->seller->name, $reconstructed->seller->name);
@@ -462,7 +473,8 @@ class IntegrationTest extends TestCase
 
         $this->assertSame(self::$detail->brand, $reconstructed->brand);
         $this->assertSame(self::$detail->model, $reconstructed->model);
-        $this->assertSame(self::$detail->price, $reconstructed->price);
+        $this->assertSame(self::$detail->askingPrice, $reconstructed->askingPrice);
+        $this->assertSame(self::$detail->priceType, $reconstructed->priceType);
         $this->assertSame(self::$detail->url, $reconstructed->url);
         $this->assertSame(count(self::$detail->images), count($reconstructed->images));
         $this->assertSame(self::$detail->seller->name, $reconstructed->seller->name);

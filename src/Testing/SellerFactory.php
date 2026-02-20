@@ -31,7 +31,7 @@ class SellerFactory
 
     public static function makeDealer(
         string $name = 'MotoPort Goes',
-        ?Province $province = Province::Zeeland,
+        ?Province $province = null,
         string $website = 'https://www.motoport-goes.nl',
         string $address = 'Nobelweg 4',
         string $city = 'Goes',

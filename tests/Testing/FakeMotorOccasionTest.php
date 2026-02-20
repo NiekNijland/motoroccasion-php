@@ -348,4 +348,63 @@ class FakeMotorOccasionTest extends TestCase
         $searchResult = $fake->search(new SearchCriteria());
         $this->assertSame(3, $searchResult->totalCount);
     }
+
+    // --- Images ---
+
+    public function test_get_images_returns_seeded_images(): void
+    {
+        $result = ResultFactory::make();
+        $images = [
+            'https://www.motoroccasion.nl/fotos/12345/photo1.jpg',
+            'https://www.motoroccasion.nl/fotos/12345/photo2.jpg',
+        ];
+
+        $fake = new FakeMotorOccasion();
+        $fake->setImages($result, $images);
+
+        $this->assertSame($images, $fake->getImages($result));
+    }
+
+    public function test_get_images_falls_back_to_detail_images(): void
+    {
+        $result = ResultFactory::make();
+        $detail = ListingDetailFactory::make(url: $result->url);
+
+        $fake = new FakeMotorOccasion();
+        $fake->setDetail($result, $detail);
+
+        $this->assertSame($detail->images, $fake->getImages($result));
+    }
+
+    public function test_get_images_prefers_direct_images_over_detail(): void
+    {
+        $result = ResultFactory::make();
+        $detail = ListingDetailFactory::make(url: $result->url);
+        $directImages = ['https://example.com/direct.jpg'];
+
+        $fake = new FakeMotorOccasion();
+        $fake->setDetail($result, $detail);
+        $fake->setImages($result, $directImages);
+
+        $this->assertSame($directImages, $fake->getImages($result));
+    }
+
+    public function test_get_images_throws_when_no_images_or_detail_configured(): void
+    {
+        $fake = new FakeMotorOccasion();
+
+        $this->expectException(MotorOccasionException::class);
+        $this->expectExceptionMessage('No fake images or detail configured');
+
+        $fake->getImages(ResultFactory::make());
+    }
+
+    public function test_set_images_returns_self_for_chaining(): void
+    {
+        $fake = new FakeMotorOccasion();
+
+        $result = $fake->setImages(ResultFactory::make(), ['https://example.com/photo.jpg']);
+
+        $this->assertSame($fake, $result);
+    }
 }

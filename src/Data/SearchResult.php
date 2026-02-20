@@ -20,7 +20,7 @@ readonly class SearchResult
     public function totalPages(): int
     {
         if ($this->perPage <= 0 || $this->totalCount <= 0) {
-            return 1;
+            return 0;
         }
 
         return (int) ceil($this->totalCount / $this->perPage);

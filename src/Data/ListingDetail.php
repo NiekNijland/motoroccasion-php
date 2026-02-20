@@ -74,6 +74,18 @@ readonly class ListingDetail
             );
         }
 
+        $license = null;
+        if (isset($data['license'])) {
+            try {
+                $license = LicenseCategory::from($data['license']);
+            } catch (ValueError $valueError) {
+                throw new MotorOccasionException(
+                    'Invalid license category: ' . $data['license'],
+                    previous: $valueError,
+                );
+            }
+        }
+
         return new self(
             brand: $data['brand'],
             model: $data['model'],
@@ -86,7 +98,7 @@ readonly class ListingDetail
             odometerReadingUnit: $odometerUnit,
             color: $data['color'],
             powerKw: $data['powerKw'],
-            license: isset($data['license']) ? LicenseCategory::tryFrom($data['license']) : null,
+            license: $license,
             warranty: $data['warranty'],
             images: $data['images'],
             description: $data['description'],

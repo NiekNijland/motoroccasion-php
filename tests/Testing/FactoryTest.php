@@ -159,7 +159,7 @@ class FactoryTest extends TestCase
         $seller = SellerFactory::makeDealer();
 
         $this->assertSame('MotoPort Goes', $seller->name);
-        $this->assertSame(Province::Zeeland, $seller->province);
+        $this->assertNull($seller->province);
         $this->assertSame('Nobelweg 4', $seller->address);
         $this->assertSame('Goes', $seller->city);
         $this->assertSame('0113-231640', $seller->phone);

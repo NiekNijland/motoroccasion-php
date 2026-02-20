@@ -449,9 +449,9 @@ class HtmlParser
         /** @var DOMElement $option */
         foreach ($optionElements as $option) {
             $value = $option->getAttribute('value');
-            $name = $option->nodeValue;
+            $name = trim($option->nodeValue ?? '');
 
-            if ($value === '-1' || $name === null || $name === '') {
+            if ($value === '' || $value === '-1' || $name === '') {
                 continue;
             }
 
@@ -815,10 +815,10 @@ class HtmlParser
     private function parseBrandAndModel(string $title): array
     {
         // Strip common prefix "Motoroccasion.nl, "
-        $title = preg_replace('/^Motoroccasion\.nl,\s*/i', '', $title);
+        $title = (string) preg_replace('/^Motoroccasion\.nl,\s*/i', '', $title);
 
         // Strip trailing " - motoroccasion.nl"
-        $title = trim((string) preg_replace('/\s*-\s*motoroccasion.*$/i', '', (string) $title));
+        $title = trim((string) preg_replace('/\s*-\s*motoroccasion.*$/i', '', $title));
 
         // New format: "Bmw - R 27" (brand - model with dash separator)
         if (str_contains($title, ' - ')) {
@@ -1181,7 +1181,7 @@ class HtmlParser
      */
     private function normalizeLabel(string $label): string
     {
-        return strtolower(trim($label));
+        return mb_strtolower(trim($label));
     }
 
     /**

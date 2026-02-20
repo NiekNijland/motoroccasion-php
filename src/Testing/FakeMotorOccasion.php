@@ -40,6 +40,9 @@ class FakeMotorOccasion implements MotorOccasionInterface
     /** @var list<array{method: string, args: array<mixed>}> */
     private array $calls = [];
 
+    /** @var array<string, string[]> Images keyed by result URL, returned from getImages() */
+    private array $images = [];
+
     /**
      * @param Brand[] $brands Brands to return from getBrands()
      * @param Category[] $categories Categories to return from getCategories()
@@ -101,6 +104,16 @@ class FakeMotorOccasion implements MotorOccasionInterface
     public function setDetail(Result $result, ListingDetail $detail): self
     {
         $this->details[$result->url] = $detail;
+
+        return $this;
+    }
+
+    /**
+     * @param string[] $images
+     */
+    public function setImages(Result $result, array $images): self
+    {
+        $this->images[$result->url] = $images;
 
         return $this;
     }
@@ -219,8 +232,12 @@ class FakeMotorOccasion implements MotorOccasionInterface
         $this->recordCall('getImages', ['result' => $result]);
         $this->throwIfConfigured();
 
+        if (isset($this->images[$result->url])) {
+            return $this->images[$result->url];
+        }
+
         if (! isset($this->details[$result->url])) {
-            throw new MotorOccasionException('No fake detail configured for URL: ' . $result->url);
+            throw new MotorOccasionException('No fake images or detail configured for URL: ' . $result->url);
         }
 
         return $this->details[$result->url]->images;

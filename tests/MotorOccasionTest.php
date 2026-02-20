@@ -280,7 +280,7 @@ class MotorOccasionTest extends TestCase
             perPage: 20,
         );
 
-        $this->assertSame(1, $searchResult->totalPages());
+        $this->assertSame(0, $searchResult->totalPages());
         $this->assertFalse($searchResult->hasNextPage());
     }
 
@@ -1954,5 +1954,233 @@ class MotorOccasionTest extends TestCase
         $criteria = new SearchCriteria();
 
         $this->assertNull($criteria->sortOrder);
+    }
+
+    // --- Price type parsing ---
+
+    public function test_result_from_array_invalid_price_type_throws_motor_occasion_exception(): void
+    {
+        $data = [
+            'brand' => 'BMW',
+            'model' => 'R 1250 GS',
+            'askingPrice' => 18950,
+            'priceType' => 'INVALID',
+            'year' => 2021,
+            'odometerReading' => 25000,
+            'odometerReadingUnit' => 'KM',
+            'image' => 'https://example.com/bmw.jpg',
+            'url' => 'https://www.motoroccasion.nl/motor/12345/bmw-r-1250-gs',
+            'seller' => [
+                'name' => 'Test',
+                'province' => null,
+                'website' => '',
+            ],
+        ];
+
+        $this->expectException(MotorOccasionException::class);
+        $this->expectExceptionMessage('Invalid price type: INVALID');
+
+        Result::fromArray($data);
+    }
+
+    public function test_listing_detail_from_array_invalid_price_type_throws_motor_occasion_exception(): void
+    {
+        $data = [
+            'brand' => 'BMW',
+            'model' => 'R 1250 GS',
+            'askingPrice' => 18950,
+            'priceType' => 'INVALID',
+            'originalPrice' => null,
+            'monthlyLease' => null,
+            'year' => 2021,
+            'odometerReading' => 25000,
+            'odometerReadingUnit' => 'KM',
+            'color' => null,
+            'powerKw' => null,
+            'license' => null,
+            'warranty' => null,
+            'images' => [],
+            'description' => null,
+            'specifications' => [],
+            'url' => 'https://www.motoroccasion.nl/motor/12345/bmw-r-1250-gs',
+            'seller' => [
+                'name' => 'Test',
+                'province' => null,
+                'website' => '',
+                'address' => null,
+                'city' => null,
+                'phone' => null,
+            ],
+        ];
+
+        $this->expectException(MotorOccasionException::class);
+        $this->expectExceptionMessage('Invalid price type: INVALID');
+
+        ListingDetail::fromArray($data);
+    }
+
+    public function test_listing_detail_from_array_invalid_license_throws_motor_occasion_exception(): void
+    {
+        $data = [
+            'brand' => 'BMW',
+            'model' => 'R 1250 GS',
+            'askingPrice' => 18950,
+            'priceType' => 'asking',
+            'originalPrice' => null,
+            'monthlyLease' => null,
+            'year' => 2021,
+            'odometerReading' => 25000,
+            'odometerReadingUnit' => 'KM',
+            'color' => null,
+            'powerKw' => null,
+            'license' => 'X99',
+            'warranty' => null,
+            'images' => [],
+            'description' => null,
+            'specifications' => [],
+            'url' => 'https://www.motoroccasion.nl/motor/12345/bmw-r-1250-gs',
+            'seller' => [
+                'name' => 'Test',
+                'province' => null,
+                'website' => '',
+                'address' => null,
+                'city' => null,
+                'phone' => null,
+            ],
+        ];
+
+        $this->expectException(MotorOccasionException::class);
+        $this->expectExceptionMessage('Invalid license category: X99');
+
+        ListingDetail::fromArray($data);
+    }
+
+    // --- SearchResult edge cases ---
+
+    public function test_search_result_total_pages_with_zero_per_page(): void
+    {
+        $searchResult = new SearchResult(
+            results: [],
+            totalCount: 100,
+            currentPage: 1,
+            perPage: 0,
+        );
+
+        $this->assertSame(0, $searchResult->totalPages());
+        $this->assertFalse($searchResult->hasNextPage());
+    }
+
+    public function test_search_result_total_pages_with_negative_per_page(): void
+    {
+        $searchResult = new SearchResult(
+            results: [],
+            totalCount: 100,
+            currentPage: 1,
+            perPage: -1,
+        );
+
+        $this->assertSame(0, $searchResult->totalPages());
+        $this->assertFalse($searchResult->hasNextPage());
+    }
+
+    // --- Empty search results ---
+
+    public function test_search_with_no_matching_results(): void
+    {
+        $mock = new MockHandler([
+            $this->sessionResponse(),
+            $this->okResponse('<div class="noResultsFound">Geen resultaten gevonden</div>'),
+        ]);
+
+        $httpClient = $this->createClientWithMock($mock);
+
+        $client = new MotorOccasion(httpClient: $httpClient);
+        $searchResult = $client->search(new SearchCriteria());
+
+        $this->assertCount(0, $searchResult->results);
+        $this->assertSame(0, $searchResult->totalCount);
+    }
+
+    // --- Price type bidding/negotiable ---
+
+    public function test_result_bidding_price_type(): void
+    {
+        $data = [
+            'brand' => 'Honda',
+            'model' => 'CBR',
+            'askingPrice' => 5000,
+            'priceType' => 'bidding',
+            'year' => 2020,
+            'odometerReading' => 10000,
+            'odometerReadingUnit' => 'KM',
+            'image' => '',
+            'url' => 'https://www.motoroccasion.nl/motor/123/honda',
+            'seller' => ['name' => 'Test', 'province' => null, 'website' => ''],
+        ];
+
+        $result = Result::fromArray($data);
+
+        $this->assertSame(PriceType::Bidding, $result->priceType);
+        $this->assertSame(5000, $result->askingPrice);
+    }
+
+    public function test_result_negotiable_price_type(): void
+    {
+        $data = [
+            'brand' => 'Honda',
+            'model' => 'CBR',
+            'askingPrice' => null,
+            'priceType' => 'negotiable',
+            'year' => 2020,
+            'odometerReading' => 10000,
+            'odometerReadingUnit' => 'KM',
+            'image' => '',
+            'url' => 'https://www.motoroccasion.nl/motor/123/honda',
+            'seller' => ['name' => 'Test', 'province' => null, 'website' => ''],
+        ];
+
+        $result = Result::fromArray($data);
+
+        $this->assertSame(PriceType::Negotiable, $result->priceType);
+        $this->assertNull($result->askingPrice);
+    }
+
+    // --- JSON key validation ---
+
+    public function test_get_brands_throws_on_missing_brands_key(): void
+    {
+        $mock = new MockHandler([
+            $this->sessionResponse(),
+            $this->okResponse('{"types": "<option>test</option>"}'),
+        ]);
+
+        $httpClient = $this->createClientWithMock($mock);
+
+        $client = new MotorOccasion(httpClient: $httpClient);
+
+        $this->expectException(MotorOccasionException::class);
+        $this->expectExceptionMessage('Missing or invalid "brands" key');
+
+        $client->getBrands();
+    }
+
+    public function test_get_types_for_brand_throws_on_missing_types_key(): void
+    {
+        $brand = new Brand(name: 'BMW', value: '4');
+
+        $mock = new MockHandler([
+            $this->sessionResponse(),
+            $this->okResponse(), // setSessionParam
+            $this->okResponse('{"brands": "<option>test</option>"}'),
+        ]);
+
+        $httpClient = $this->createClientWithMock($mock);
+
+        $client = new MotorOccasion(httpClient: $httpClient);
+
+        $this->expectException(MotorOccasionException::class);
+        $this->expectExceptionMessage('Missing or invalid "types" key');
+
+        $client->getTypesForBrand($brand);
     }
 }

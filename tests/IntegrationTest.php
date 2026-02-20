@@ -61,7 +61,7 @@ class IntegrationTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         // 1. Fetch brands and categories (shared session)
-        $client = new MotorOccasion;
+        $client = new MotorOccasion();
         self::$brands = $client->getBrands();
         self::$categories = $client->getCategories();
 
@@ -78,9 +78,9 @@ class IntegrationTest extends TestCase
         // 3. BMW-filtered search (reliable even under rate-limiting,
         //    since setSessionParam calls always trigger result generation)
         if (self::$bmwBrand instanceof Brand) {
-            $typesClient = new MotorOccasion;
+            $typesClient = new MotorOccasion();
             self::$bmwTypes = $typesClient->getTypesForBrand(self::$bmwBrand);
-            $searchClient = new MotorOccasion;
+            $searchClient = new MotorOccasion();
             self::$searchResult = $searchClient->search(new SearchCriteria(brand: self::$bmwBrand, perPage: 10));
             // 4. Fetch detail for first search result (reuses searchClient session)
             if (self::$searchResult->results !== []) {
@@ -91,19 +91,19 @@ class IntegrationTest extends TestCase
         }
 
         // 5. Offers (separate endpoint, not affected by search rate-limiting)
-        $offersClient = new MotorOccasion;
+        $offersClient = new MotorOccasion();
         self::$offersResult = $offersClient->getOffers(perPage: 10);
 
         // 6. Sorted searches (verify sort order params work against live site)
         if (self::$bmwBrand instanceof Brand) {
-            $sortedPriceClient = new MotorOccasion;
+            $sortedPriceClient = new MotorOccasion();
             self::$sortedByPriceResult = $sortedPriceClient->search(new SearchCriteria(
                 brand: self::$bmwBrand,
                 sortOrder: SortOrder::PriceAscending,
                 perPage: 10,
             ));
 
-            $sortedYearClient = new MotorOccasion;
+            $sortedYearClient = new MotorOccasion();
             self::$sortedByYearDescResult = $sortedYearClient->search(new SearchCriteria(
                 brand: self::$bmwBrand,
                 sortOrder: SortOrder::YearDescending,

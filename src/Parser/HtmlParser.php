@@ -104,7 +104,7 @@ class HtmlParser
     {
         $doc = new DOMDocument(encoding: 'UTF-8');
 
-        @$doc->loadHTML('<html><body><div id="results-wrapper">'.$html.'</div></body></html>');
+        @$doc->loadHTML('<html><body><div id="results-wrapper">' . $html . '</div></body></html>');
 
         /** @var ?DOMElement $wrapper */
         $wrapper = $doc->getElementById('results-wrapper');
@@ -129,7 +129,7 @@ class HtmlParser
     {
         $doc = new DOMDocument(encoding: 'UTF-8');
 
-        @$doc->loadHTML('<html><body><div id="offers-wrapper">'.$html.'</div></body></html>');
+        @$doc->loadHTML('<html><body><div id="offers-wrapper">' . $html . '</div></body></html>');
 
         /** @var ?DOMElement $wrapper */
         $wrapper = $doc->getElementById('offers-wrapper');
@@ -433,7 +433,7 @@ class HtmlParser
     {
         $doc = new DOMDocument(encoding: 'UTF-8');
 
-        @$doc->loadHTML('<html lang="en"><body><select id="select">'.$html.'</select></body></html>');
+        @$doc->loadHTML('<html lang="en"><body><select id="select">' . $html . '</select></body></html>');
 
         /** @var ?DOMElement $select */
         $select = $doc->getElementById('select');
@@ -462,7 +462,7 @@ class HtmlParser
     }
 
     /**
-     * @param  Result[]  $results
+     * @param Result[] $results
      */
     private function collectResultNodes(DOMElement $element, array &$results): void
     {
@@ -510,7 +510,7 @@ class HtmlParser
 
         $link = $img->parentNode;
         $href = $link instanceof DOMElement ? $link->getAttribute('href') : '';
-        $url = $href !== '' ? self::BASE_URL.$href : '';
+        $url = $href !== '' ? self::BASE_URL . $href : '';
 
         // Brand from tile-brandname span (strip trailing &nbsp;)
         $brand = '';
@@ -635,7 +635,7 @@ class HtmlParser
     }
 
     /**
-     * @param  Result[]  $results
+     * @param Result[] $results
      */
     private function collectOfferNodes(DOMElement $element, array &$results): void
     {
@@ -697,7 +697,7 @@ class HtmlParser
                 $parentLink = $photoImg->parentNode;
 
                 if ($parentLink instanceof DOMElement && $parentLink->tagName === 'a') {
-                    $url = self::BASE_URL.$parentLink->getAttribute('href');
+                    $url = self::BASE_URL . $parentLink->getAttribute('href');
                 }
             }
         }
@@ -710,7 +710,7 @@ class HtmlParser
                 $contentLink = $contentLinks->item(0);
 
                 if ($contentLink instanceof DOMElement) {
-                    $url = self::BASE_URL.$contentLink->getAttribute('href');
+                    $url = self::BASE_URL . $contentLink->getAttribute('href');
                 }
             }
         }
@@ -961,7 +961,7 @@ class HtmlParser
                     // Strip UTM parameters to get clean website URL
                     $parsed = parse_url($rawUrl);
                     if ($parsed !== false && isset($parsed['scheme'], $parsed['host'])) {
-                        $website = $parsed['scheme'].'://'.$parsed['host'];
+                        $website = $parsed['scheme'] . '://' . $parsed['host'];
                         if (isset($parsed['path']) && $parsed['path'] !== '/') {
                             $website .= $parsed['path'];
                         }
@@ -1191,7 +1191,7 @@ class HtmlParser
      * thousands separators ("1.832 cc" -> 1832) and decimal values
      * ("499.6 cc" -> 500).
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractEngineCapacityCc(array $specs): ?int
     {
@@ -1210,7 +1210,7 @@ class HtmlParser
     /**
      * Determine if the motorcycle is electric from the fuel type specification.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractIsElectric(array $specs): ?bool
     {
@@ -1228,7 +1228,7 @@ class HtmlParser
     /**
      * Determine VAT deductibility from the BTW/Marge specification.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractVatDeductible(array $specs): ?bool
     {
@@ -1256,7 +1256,7 @@ class HtmlParser
     /**
      * Extract the fuel type string from specifications.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractFuelType(array $specs): ?string
     {
@@ -1266,7 +1266,7 @@ class HtmlParser
     /**
      * Extract the number of cylinders from specifications.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractCylinders(array $specs): ?int
     {
@@ -1284,7 +1284,7 @@ class HtmlParser
     /**
      * Extract the license plate from specifications.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractLicensePlate(array $specs): ?string
     {
@@ -1294,7 +1294,7 @@ class HtmlParser
     /**
      * Extract the damage status from specifications.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractDamageStatus(array $specs): ?string
     {
@@ -1304,7 +1304,7 @@ class HtmlParser
     /**
      * Extract the body type from specifications.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractBodyType(array $specs): ?string
     {
@@ -1314,7 +1314,7 @@ class HtmlParser
     /**
      * Extract the road tax status from specifications.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractRoadTaxStatus(array $specs): ?string
     {
@@ -1324,7 +1324,7 @@ class HtmlParser
     /**
      * Extract ABS availability from specifications.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractAbs(array $specs): ?bool
     {
@@ -1343,7 +1343,7 @@ class HtmlParser
      * Matches patterns like "830 mm", "1535mm", and handles Dutch thousands
      * separators ("1,440 mm" -> 1440) and decimal values ("830.5 mm" -> 831).
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractMillimeters(array $specs, string $key): ?int
     {
@@ -1369,7 +1369,7 @@ class HtmlParser
      * Handles Dutch decimal notation (comma as separator): "16,9 liter" -> 16.9.
      * Also handles plain integers: "169 liter" -> 169.0.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractTankCapacityLiters(array $specs): ?float
     {
@@ -1390,7 +1390,7 @@ class HtmlParser
      * Matches patterns like "208 kg", "208kg", "1,200 kg", or plain "208".
      * Handles Dutch thousands separators and decimal values ("148.5 kg" -> 149).
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractWeightKg(array $specs): ?int
     {
@@ -1440,7 +1440,7 @@ class HtmlParser
         if (preg_match('/^(.*)[.,](\d{1,2})$/', $value, $parts)) {
             $integerPart = (string) preg_replace('/[.,]/', '', $parts[1]);
 
-            return (int) round((float) ($integerPart.'.'.$parts[2]));
+            return (int) round((float) ($integerPart . '.' . $parts[2]));
         }
 
         // Fallback: strip all separators
@@ -1452,7 +1452,7 @@ class HtmlParser
      *
      * Returns the trimmed value or null if not present or empty.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractStringSpec(array $specs, string $key): ?string
     {
@@ -1468,7 +1468,7 @@ class HtmlParser
     /**
      * Extract the number of valves from specifications.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractValves(array $specs): ?int
     {
@@ -1486,7 +1486,7 @@ class HtmlParser
     /**
      * Determine if the motorcycle is listed as new from description specs.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractIsNew(array $specs): ?bool
     {
@@ -1502,7 +1502,7 @@ class HtmlParser
     /**
      * Extract the model year from specifications.
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractModelYear(array $specs): ?int
     {
@@ -1522,7 +1522,7 @@ class HtmlParser
      *
      * Matches patterns like "72 maanden", "24 months", or plain "72".
      *
-     * @param  array<string, string>  $specs
+     * @param array<string, string> $specs
      */
     private function extractFactoryWarrantyMonths(array $specs): ?int
     {
@@ -1573,7 +1573,7 @@ class HtmlParser
         foreach ($scripts as $script) {
             $scriptText = $script->textContent;
             if (preg_match('/gm_postcode\s*=\s*["\'](\d{4})\s*([A-Z]{2})["\']/', $scriptText, $match)) {
-                return $match[1].' '.$match[2];
+                return $match[1] . ' ' . $match[2];
             }
         }
 
@@ -1582,7 +1582,7 @@ class HtmlParser
             /** @var array{0: string, 1: string, 2: string} $last */
             $last = end($matches);
 
-            return $last[1].' '.$last[2];
+            return $last[1] . ' ' . $last[2];
         }
 
         return null;
@@ -1618,7 +1618,7 @@ class HtmlParser
         $result = $xpath->query($expression, $contextNode);
 
         if ($result === false) {
-            throw new MotorOccasionException('Invalid XPath expression: '.$expression);
+            throw new MotorOccasionException('Invalid XPath expression: ' . $expression);
         }
 
         /** @var DOMNodeList<DOMNode> $result */

@@ -2,6 +2,10 @@
 
 All notable changes to `motor-occasion-php` will be documented in this file.
 
+## v1.0.0 - 2026-03-01
+
+No changes. mark as stable.
+
 ## Unreleased
 
 ### Added
@@ -11,11 +15,13 @@ All notable changes to `motor-occasion-php` will be documented in this file.
   - `OnRequest` — "prijs op aanvraag" / no price available
   - `Negotiable` — "n.o.t.k." / "nader overeen te komen"
   - `Bidding` — "bieden" / "bieding"
+  
 - `priceType` field on `Result` and `ListingDetail` DTOs
 - `Engine`, `Chassis`, and `Dimensions` sub-DTOs to group technical specifications on `ListingDetail`
   - `Engine` (16 fields): `capacityCc`, `type`, `cylinders`, `valves`, `boreAndStroke`, `compressionRatio`, `fuelDelivery`, `fuelType`, `isElectric`, `ignition`, `maxTorque`, `clutch`, `gearbox`, `driveType`, `starter`, `topSpeed`
   - `Chassis` (8 fields): `abs`, `frameType`, `frontSuspension`, `rearSuspension`, `frontBrake`, `rearBrake`, `frontTire`, `rearTire`
   - `Dimensions` (7 fields): `seatHeightMm`, `wheelbaseMm`, `lengthMm`, `widthMm`, `heightMm`, `tankCapacityLiters`, `weightKg`
+  
 - `EngineFactory`, `ChassisFactory`, `DimensionsFactory` testing utilities
 - New `postalCode` field on `Seller` DTO, extracted from JavaScript variables on the page (authoritative source)
 - Description key-value pairs are now parsed into the `specifications` array when the `deta-tech` table is empty

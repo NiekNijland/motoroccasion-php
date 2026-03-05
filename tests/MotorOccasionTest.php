@@ -1128,13 +1128,13 @@ class MotorOccasionTest extends TestCase
         // Populate cache
         $brands = $client->getBrands();
         $this->assertNotEmpty($brands);
-        $this->assertNotNull($cache->get('motor-occasion:brands'));
+        $this->assertNotNull($cache->get('motoroccasion:brands'));
 
         // Reset should clear external cache
         $client->resetSession();
 
-        $this->assertNull($cache->get('motor-occasion:brands'));
-        $this->assertNull($cache->get('motor-occasion:categories'));
+        $this->assertNull($cache->get('motoroccasion:brands'));
+        $this->assertNull($cache->get('motoroccasion:categories'));
     }
 
     public function test_search_does_not_invalidate_external_cache(): void
@@ -1160,14 +1160,14 @@ class MotorOccasionTest extends TestCase
         // Populate the brands cache
         $brands = $client->getBrands();
         $this->assertCount(3, $brands);
-        $this->assertNotNull($cache->get('motor-occasion:brands'));
+        $this->assertNotNull($cache->get('motoroccasion:brands'));
 
         // search() should NOT wipe the external cache
         $searchResult = $client->search(new SearchCriteria(brand: $brand));
         $this->assertInstanceOf(SearchResult::class, $searchResult);
 
         // Brands cache should still be intact
-        $this->assertNotNull($cache->get('motor-occasion:brands'), 'search() should not invalidate the external brands cache');
+        $this->assertNotNull($cache->get('motoroccasion:brands'), 'search() should not invalidate the external brands cache');
     }
 
     // --- Province enum ---
@@ -1692,7 +1692,7 @@ class MotorOccasionTest extends TestCase
         ];
 
         $cache = new ArrayCache();
-        $cache->set('motor-occasion:brands', $cachedBrands);
+        $cache->set('motoroccasion:brands', $cachedBrands);
 
         // No HTTP responses queued — if cache misses, it would fail
         $mock = new MockHandler([]);
@@ -1728,7 +1728,7 @@ class MotorOccasionTest extends TestCase
         $this->assertCount(3, $brands);
 
         // Verify it was cached
-        $cached = $cache->get('motor-occasion:brands');
+        $cached = $cache->get('motoroccasion:brands');
 
         $this->assertNotNull($cached);
         $this->assertCount(3, $cached);
@@ -1742,7 +1742,7 @@ class MotorOccasionTest extends TestCase
         ];
 
         $cache = new ArrayCache();
-        $cache->set('motor-occasion:categories', $cachedCategories);
+        $cache->set('motoroccasion:categories', $cachedCategories);
 
         $mock = new MockHandler([]);
 
@@ -1774,7 +1774,7 @@ class MotorOccasionTest extends TestCase
 
         $this->assertCount(17, $categories);
 
-        $cached = $cache->get('motor-occasion:categories');
+        $cached = $cache->get('motoroccasion:categories');
 
         $this->assertNotNull($cached);
         $this->assertCount(17, $cached);

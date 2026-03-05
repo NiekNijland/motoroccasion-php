@@ -1,4 +1,4 @@
-# motor-occasion-php
+# motoroccasion-php
 
 PHP client for [motoroccasion.nl](https://www.motoroccasion.nl) -- the largest used motorcycle marketplace in the Netherlands. Search listings, browse brands and types, view special dealer offers, and fetch full listing details with photos and specifications.
 
@@ -10,7 +10,7 @@ PHP client for [motoroccasion.nl](https://www.motoroccasion.nl) -- the largest u
 ## Installation
 
 ```bash
-composer require nieknijland/motor-occasion-php
+composer require nieknijland/motoroccasion-php
 ```
 
 ## Quick start

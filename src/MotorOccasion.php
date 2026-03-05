@@ -61,7 +61,7 @@ class MotorOccasion implements MotorOccasionInterface
     public function getBrands(): array
     {
         /** @var Brand[]|null $cached */
-        $cached = $this->cache?->get('motor-occasion:brands');
+        $cached = $this->cache?->get('motoroccasion:brands');
 
         if ($cached !== null) {
             return $cached;
@@ -83,7 +83,7 @@ class MotorOccasion implements MotorOccasionInterface
 
         $brands = $this->parser->parseBrandsHtml($data['brands']);
 
-        $this->cache?->set('motor-occasion:brands', $brands, $this->cacheTtl);
+        $this->cache?->set('motoroccasion:brands', $brands, $this->cacheTtl);
 
         return $brands;
     }
@@ -167,7 +167,7 @@ class MotorOccasion implements MotorOccasionInterface
     public function getCategories(): array
     {
         /** @var Category[]|null $cached */
-        $cached = $this->cache?->get('motor-occasion:categories');
+        $cached = $this->cache?->get('motoroccasion:categories');
 
         if ($cached !== null) {
             return $cached;
@@ -176,7 +176,7 @@ class MotorOccasion implements MotorOccasionInterface
         $this->ensureSession();
 
         if ($this->categories !== null) {
-            $this->cache?->set('motor-occasion:categories', $this->categories, $this->cacheTtl);
+            $this->cache?->set('motoroccasion:categories', $this->categories, $this->cacheTtl);
 
             return $this->categories;
         }
@@ -187,7 +187,7 @@ class MotorOccasion implements MotorOccasionInterface
 
         $this->categories = $this->parser->parseCategoriesFromHomepage($this->homepageHtml);
 
-        $this->cache?->set('motor-occasion:categories', $this->categories, $this->cacheTtl);
+        $this->cache?->set('motoroccasion:categories', $this->categories, $this->cacheTtl);
 
         return $this->categories;
     }
@@ -263,8 +263,8 @@ class MotorOccasion implements MotorOccasionInterface
     {
         $this->clearSession();
 
-        $this->cache?->delete('motor-occasion:brands');
-        $this->cache?->delete('motor-occasion:categories');
+        $this->cache?->delete('motoroccasion:brands');
+        $this->cache?->delete('motoroccasion:categories');
     }
 
     /**

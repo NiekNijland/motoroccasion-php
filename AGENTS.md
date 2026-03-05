@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-PHP package (`nieknijland/motor-occasion-php`) that scrapes motoroccasion.nl to fetch motorcycle listings, brands, types, categories, offers, and listing details. Uses Guzzle for HTTP and DOMDocument/DOMXPath for HTML parsing. Standalone Composer library — no framework dependency. Requires PHP `^8.3`. Every PHP file starts with `declare(strict_types=1);`.
+PHP package (`nieknijland/motormoccasion-php`) that scrapes motoroccasion.nl to fetch motorcycle listings, brands, types, categories, offers, and listing details. Uses Guzzle for HTTP and DOMDocument/DOMXPath for HTML parsing. Standalone Composer library — no framework dependency. Requires PHP `^8.3`. Every PHP file starts with `declare(strict_types=1);`.
 
 ## Build & Run Commands
 

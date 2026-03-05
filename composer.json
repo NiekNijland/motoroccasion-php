@@ -1,11 +1,11 @@
 {
-    "name": "nieknijland/motor-occasion-php",
+    "name": "nieknijland/motoroccasion-php",
     "description": "PHP Package to fetch from motoroccasion.nl",
     "keywords": [
         "NiekNijland",
-        "motor-occasion-php"
+        "motoroccasion-php"
     ],
-    "homepage": "https://github.com/nieknijland/motor-occasion-php",
+    "homepage": "https://github.com/nieknijland/motoroccasion-php",
     "license": "MIT",
     "authors": [
         {

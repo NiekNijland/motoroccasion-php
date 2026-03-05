@@ -59,19 +59,13 @@ readonly class ListingDetail
         try {
             $odometerUnit = OdometerUnit::from($data['odometerReadingUnit']);
         } catch (ValueError $valueError) {
-            throw new MotorOccasionException(
-                'Invalid odometer unit: ' . $data['odometerReadingUnit'],
-                previous: $valueError,
-            );
+            throw new MotorOccasionException('Invalid odometer unit: ' . $data['odometerReadingUnit'], $valueError->getCode(), previous: $valueError);
         }
 
         try {
             $priceType = PriceType::from($data['priceType']);
         } catch (ValueError $valueError) {
-            throw new MotorOccasionException(
-                'Invalid price type: ' . $data['priceType'],
-                previous: $valueError,
-            );
+            throw new MotorOccasionException('Invalid price type: ' . $data['priceType'], $valueError->getCode(), previous: $valueError);
         }
 
         $license = null;
@@ -79,10 +73,7 @@ readonly class ListingDetail
             try {
                 $license = LicenseCategory::from($data['license']);
             } catch (ValueError $valueError) {
-                throw new MotorOccasionException(
-                    'Invalid license category: ' . $data['license'],
-                    previous: $valueError,
-                );
+                throw new MotorOccasionException('Invalid license category: ' . $data['license'], $valueError->getCode(), previous: $valueError);
             }
         }
 

@@ -74,7 +74,7 @@ class MotorOccasion implements MotorOccasionInterface
         try {
             $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $jsonException) {
-            throw new MotorOccasionException('Failed to decode brands response: ' . $jsonException->getMessage(), previous: $jsonException);
+            throw new MotorOccasionException('Failed to decode brands response: ' . $jsonException->getMessage(), $jsonException->getCode(), previous: $jsonException);
         }
 
         if (! isset($data['brands']) || ! is_string($data['brands'])) {
@@ -108,7 +108,7 @@ class MotorOccasion implements MotorOccasionInterface
         try {
             $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $jsonException) {
-            throw new MotorOccasionException('Failed to decode types response: ' . $jsonException->getMessage(), previous: $jsonException);
+            throw new MotorOccasionException('Failed to decode types response: ' . $jsonException->getMessage(), $jsonException->getCode(), previous: $jsonException);
         }
 
         if (! isset($data['types']) || ! is_string($data['types'])) {
@@ -296,7 +296,7 @@ class MotorOccasion implements MotorOccasionInterface
                 ],
             ]);
         } catch (GuzzleException $guzzleException) {
-            throw new MotorOccasionException('HTTP request failed for ' . $endpoint . ': ' . $guzzleException->getMessage(), previous: $guzzleException);
+            throw new MotorOccasionException('HTTP request failed for ' . $endpoint . ': ' . $guzzleException->getMessage(), $guzzleException->getCode(), previous: $guzzleException);
         }
 
         if ($response->getStatusCode() !== 200) {
@@ -320,7 +320,7 @@ class MotorOccasion implements MotorOccasionInterface
                 'cookies' => $this->cookieJar,
             ]);
         } catch (GuzzleException $guzzleException) {
-            throw new MotorOccasionException('HTTP request failed for detail page: ' . $guzzleException->getMessage(), previous: $guzzleException);
+            throw new MotorOccasionException('HTTP request failed for detail page: ' . $guzzleException->getMessage(), $guzzleException->getCode(), previous: $guzzleException);
         }
 
         if ($response->getStatusCode() !== 200) {
@@ -344,7 +344,7 @@ class MotorOccasion implements MotorOccasionInterface
                 'cookies' => $this->cookieJar,
             ]);
         } catch (GuzzleException $guzzleException) {
-            throw new MotorOccasionException('HTTP request failed while establishing session: ' . $guzzleException->getMessage(), previous: $guzzleException);
+            throw new MotorOccasionException('HTTP request failed while establishing session: ' . $guzzleException->getMessage(), $guzzleException->getCode(), previous: $guzzleException);
         }
 
         if ($response->getStatusCode() !== 200) {
@@ -463,7 +463,7 @@ class MotorOccasion implements MotorOccasionInterface
                 ],
             ]);
         } catch (GuzzleException $guzzleException) {
-            throw new MotorOccasionException('HTTP request failed while setting search parameter ' . $key . ': ' . $guzzleException->getMessage(), previous: $guzzleException);
+            throw new MotorOccasionException('HTTP request failed while setting search parameter ' . $key . ': ' . $guzzleException->getMessage(), $guzzleException->getCode(), previous: $guzzleException);
         }
 
         if ($response->getStatusCode() !== 200) {
@@ -482,7 +482,7 @@ class MotorOccasion implements MotorOccasionInterface
                 'query' => ['s' => 'mz'],
             ]);
         } catch (GuzzleException $guzzleException) {
-            throw new MotorOccasionException('HTTP request failed while fetching search form: ' . $guzzleException->getMessage(), previous: $guzzleException);
+            throw new MotorOccasionException('HTTP request failed while fetching search form: ' . $guzzleException->getMessage(), $guzzleException->getCode(), previous: $guzzleException);
         }
 
         if ($response->getStatusCode() !== 200) {

@@ -10,8 +10,8 @@ use ValueError;
 readonly class ListingDetail
 {
     /**
-     * @param string[] $images
-     * @param array<string, string> $specifications
+     * @param  string[]  $images
+     * @param  array<string, string>  $specifications
      */
     public function __construct(
         public string $brand,
@@ -21,7 +21,7 @@ readonly class ListingDetail
         public ?int $originalPrice,
         public ?int $monthlyLease,
         public int $year,
-        public int $odometerReading,
+        public ?int $odometerReading,
         public OdometerUnit $odometerReadingUnit,
         public ?string $color,
         public ?int $powerKw,
@@ -32,9 +32,9 @@ readonly class ListingDetail
         public array $specifications,
         public string $url,
         public Seller $seller,
-        public Engine $engine = new Engine(),
-        public Chassis $chassis = new Chassis(),
-        public Dimensions $dimensions = new Dimensions(),
+        public Engine $engine = new Engine,
+        public Chassis $chassis = new Chassis,
+        public Dimensions $dimensions = new Dimensions,
         public ?int $id = null,
         public ?bool $vatDeductible = null,
         public ?string $licensePlate = null,
@@ -46,11 +46,10 @@ readonly class ListingDetail
         public ?int $modelYear = null,
         public ?int $factoryWarrantyMonths = null,
         public ?string $dealerDescription = null,
-    ) {
-    }
+    ) {}
 
     /**
-     * @param array{brand: string, model: string, askingPrice: ?int, priceType: string, originalPrice: ?int, monthlyLease: ?int, year: int, odometerReading: int, odometerReadingUnit: string, color: ?string, powerKw: ?int, license: ?string, warranty: ?bool, images: string[], description: ?string, specifications: array<string, string>, url: string, seller: array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string, postalCode?: ?string}, engine?: array{capacityCc?: ?int, type?: ?string, cylinders?: ?int, valves?: ?int, boreAndStroke?: ?string, compressionRatio?: ?string, fuelDelivery?: ?string, fuelType?: ?string, isElectric?: ?bool, ignition?: ?string, maxTorque?: ?string, clutch?: ?string, gearbox?: ?string, driveType?: ?string, starter?: ?string, topSpeed?: ?string}, chassis?: array{abs?: ?bool, frameType?: ?string, frontSuspension?: ?string, rearSuspension?: ?string, frontBrake?: ?string, rearBrake?: ?string, frontTire?: ?string, rearTire?: ?string}, dimensions?: array{seatHeightMm?: ?int, wheelbaseMm?: ?int, lengthMm?: ?int, widthMm?: ?int, heightMm?: ?int, tankCapacityLiters?: ?float, weightKg?: ?int}, id?: ?int, vatDeductible?: ?bool, licensePlate?: ?string, damageStatus?: ?string, bodyType?: ?string, roadTaxStatus?: ?string, availableColors?: ?string, isNew?: ?bool, modelYear?: ?int, factoryWarrantyMonths?: ?int, dealerDescription?: ?string} $data
+     * @param  array{brand: string, model: string, askingPrice: ?int, priceType: string, originalPrice: ?int, monthlyLease: ?int, year: int, odometerReading: ?int, odometerReadingUnit: string, color: ?string, powerKw: ?int, license: ?string, warranty: ?bool, images: string[], description: ?string, specifications: array<string, string>, url: string, seller: array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string, postalCode?: ?string}, engine?: array{capacityCc?: ?int, type?: ?string, cylinders?: ?int, valves?: ?int, boreAndStroke?: ?string, compressionRatio?: ?string, fuelDelivery?: ?string, fuelType?: ?string, isElectric?: ?bool, ignition?: ?string, maxTorque?: ?string, clutch?: ?string, gearbox?: ?string, driveType?: ?string, starter?: ?string, topSpeed?: ?string}, chassis?: array{abs?: ?bool, frameType?: ?string, frontSuspension?: ?string, rearSuspension?: ?string, frontBrake?: ?string, rearBrake?: ?string, frontTire?: ?string, rearTire?: ?string}, dimensions?: array{seatHeightMm?: ?int, wheelbaseMm?: ?int, lengthMm?: ?int, widthMm?: ?int, heightMm?: ?int, tankCapacityLiters?: ?float, weightKg?: ?int}, id?: ?int, vatDeductible?: ?bool, licensePlate?: ?string, damageStatus?: ?string, bodyType?: ?string, roadTaxStatus?: ?string, availableColors?: ?string, isNew?: ?bool, modelYear?: ?int, factoryWarrantyMonths?: ?int, dealerDescription?: ?string}  $data
      *
      * @throws MotorOccasionException
      */
@@ -59,13 +58,13 @@ readonly class ListingDetail
         try {
             $odometerUnit = OdometerUnit::from($data['odometerReadingUnit']);
         } catch (ValueError $valueError) {
-            throw new MotorOccasionException('Invalid odometer unit: ' . $data['odometerReadingUnit'], $valueError->getCode(), previous: $valueError);
+            throw new MotorOccasionException('Invalid odometer unit: '.$data['odometerReadingUnit'], $valueError->getCode(), previous: $valueError);
         }
 
         try {
             $priceType = PriceType::from($data['priceType']);
         } catch (ValueError $valueError) {
-            throw new MotorOccasionException('Invalid price type: ' . $data['priceType'], $valueError->getCode(), previous: $valueError);
+            throw new MotorOccasionException('Invalid price type: '.$data['priceType'], $valueError->getCode(), previous: $valueError);
         }
 
         $license = null;
@@ -73,7 +72,7 @@ readonly class ListingDetail
             try {
                 $license = LicenseCategory::from($data['license']);
             } catch (ValueError $valueError) {
-                throw new MotorOccasionException('Invalid license category: ' . $data['license'], $valueError->getCode(), previous: $valueError);
+                throw new MotorOccasionException('Invalid license category: '.$data['license'], $valueError->getCode(), previous: $valueError);
             }
         }
 
@@ -114,7 +113,7 @@ readonly class ListingDetail
     }
 
     /**
-     * @return array{brand: string, model: string, askingPrice: ?int, priceType: string, originalPrice: ?int, monthlyLease: ?int, year: int, odometerReading: int, odometerReadingUnit: string, color: ?string, powerKw: ?int, license: ?string, warranty: ?bool, images: string[], description: ?string, specifications: array<string, string>, url: string, seller: array{name: string, province: ?string, website: string, address: ?string, city: ?string, phone: ?string, postalCode: ?string}, engine: array{capacityCc: ?int, type: ?string, cylinders: ?int, valves: ?int, boreAndStroke: ?string, compressionRatio: ?string, fuelDelivery: ?string, fuelType: ?string, isElectric: ?bool, ignition: ?string, maxTorque: ?string, clutch: ?string, gearbox: ?string, driveType: ?string, starter: ?string, topSpeed: ?string}, chassis: array{abs: ?bool, frameType: ?string, frontSuspension: ?string, rearSuspension: ?string, frontBrake: ?string, rearBrake: ?string, frontTire: ?string, rearTire: ?string}, dimensions: array{seatHeightMm: ?int, wheelbaseMm: ?int, lengthMm: ?int, widthMm: ?int, heightMm: ?int, tankCapacityLiters: ?float, weightKg: ?int}, id: ?int, vatDeductible: ?bool, licensePlate: ?string, damageStatus: ?string, bodyType: ?string, roadTaxStatus: ?string, availableColors: ?string, isNew: ?bool, modelYear: ?int, factoryWarrantyMonths: ?int, dealerDescription: ?string}
+     * @return array{brand: string, model: string, askingPrice: ?int, priceType: string, originalPrice: ?int, monthlyLease: ?int, year: int, odometerReading: ?int, odometerReadingUnit: string, color: ?string, powerKw: ?int, license: ?string, warranty: ?bool, images: string[], description: ?string, specifications: array<string, string>, url: string, seller: array{name: string, province: ?string, website: string, address: ?string, city: ?string, phone: ?string, postalCode: ?string}, engine: array{capacityCc: ?int, type: ?string, cylinders: ?int, valves: ?int, boreAndStroke: ?string, compressionRatio: ?string, fuelDelivery: ?string, fuelType: ?string, isElectric: ?bool, ignition: ?string, maxTorque: ?string, clutch: ?string, gearbox: ?string, driveType: ?string, starter: ?string, topSpeed: ?string}, chassis: array{abs: ?bool, frameType: ?string, frontSuspension: ?string, rearSuspension: ?string, frontBrake: ?string, rearBrake: ?string, frontTire: ?string, rearTire: ?string}, dimensions: array{seatHeightMm: ?int, wheelbaseMm: ?int, lengthMm: ?int, widthMm: ?int, heightMm: ?int, tankCapacityLiters: ?float, weightKg: ?int}, id: ?int, vatDeductible: ?bool, licensePlate: ?string, damageStatus: ?string, bodyType: ?string, roadTaxStatus: ?string, availableColors: ?string, isNew: ?bool, modelYear: ?int, factoryWarrantyMonths: ?int, dealerDescription: ?string}
      */
     public function toArray(): array
     {

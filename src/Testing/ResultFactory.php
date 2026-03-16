@@ -12,7 +12,7 @@ use NiekNijland\MotorOccasion\Data\Seller;
 class ResultFactory
 {
     /**
-     * @param  string[]  $images
+     * @param string[] $images
      */
     public static function make(
         string $brand = 'BMW',
@@ -70,7 +70,7 @@ class ResultFactory
                 model: $data['model'],
                 askingPrice: $data['askingPrice'],
                 year: $data['year'],
-                url: 'https://www.motoroccasion.nl/motor/'.$data['id'].'/'.strtolower($data['brand']).'-'.strtolower(str_replace(' ', '-', $data['model'])),
+                url: 'https://www.motoroccasion.nl/motor/' . $data['id'] . '/' . strtolower($data['brand']) . '-' . strtolower(str_replace(' ', '-', $data['model'])),
                 id: $data['id'],
             );
         }

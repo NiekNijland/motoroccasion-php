@@ -10,7 +10,7 @@ use ValueError;
 readonly class Result
 {
     /**
-     * @param  string[]  $images
+     * @param string[] $images
      */
     public function __construct(
         public string $brand,
@@ -27,10 +27,11 @@ readonly class Result
         public ?int $originalPrice = null,
         public ?int $monthlyLease = null,
         public array $images = [],
-    ) {}
+    ) {
+    }
 
     /**
-     * @param  array{brand: string, model: string, askingPrice: ?int, priceType: string, year: int, odometerReading: ?int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string}, id?: ?int, originalPrice?: ?int, monthlyLease?: ?int, images?: string[]}  $data
+     * @param array{brand: string, model: string, askingPrice: ?int, priceType: string, year: int, odometerReading: ?int, odometerReadingUnit: string, image: string, url: string, seller: array{name: string, province: ?string, website: string, address?: ?string, city?: ?string, phone?: ?string}, id?: ?int, originalPrice?: ?int, monthlyLease?: ?int, images?: string[]} $data
      *
      * @throws MotorOccasionException
      */
@@ -39,13 +40,13 @@ readonly class Result
         try {
             $odometerUnit = OdometerUnit::from($data['odometerReadingUnit']);
         } catch (ValueError $valueError) {
-            throw new MotorOccasionException('Invalid odometer unit: '.$data['odometerReadingUnit'], $valueError->getCode(), previous: $valueError);
+            throw new MotorOccasionException('Invalid odometer unit: ' . $data['odometerReadingUnit'], $valueError->getCode(), previous: $valueError);
         }
 
         try {
             $priceType = PriceType::from($data['priceType']);
         } catch (ValueError $valueError) {
-            throw new MotorOccasionException('Invalid price type: '.$data['priceType'], $valueError->getCode(), previous: $valueError);
+            throw new MotorOccasionException('Invalid price type: ' . $data['priceType'], $valueError->getCode(), previous: $valueError);
         }
 
         return new self(

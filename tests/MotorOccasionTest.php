@@ -39,7 +39,7 @@ class MotorOccasionTest extends TestCase
     }
 
     /**
-     * @param  array<int, array<string, mixed>>  $history
+     * @param array<int, array<string, mixed>> $history
      */
     private function createClientWithMockAndHistory(MockHandler $mockHandler, array &$history): Client
     {
@@ -61,47 +61,47 @@ class MotorOccasionTest extends TestCase
 
     private function homepageFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/homepage.html');
+        return file_get_contents(__DIR__ . '/Fixtures/homepage.html');
     }
 
     private function searchFormFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/search-form.json');
+        return file_get_contents(__DIR__ . '/Fixtures/search-form.json');
     }
 
     private function resultsFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/results.html');
+        return file_get_contents(__DIR__ . '/Fixtures/results.html');
     }
 
     private function detailFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/detail.html');
+        return file_get_contents(__DIR__ . '/Fixtures/detail.html');
     }
 
     private function detailNoSpecsFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/detail-no-specs.html');
+        return file_get_contents(__DIR__ . '/Fixtures/detail-no-specs.html');
     }
 
     private function detailLegacyFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/detail-legacy.html');
+        return file_get_contents(__DIR__ . '/Fixtures/detail-legacy.html');
     }
 
     private function detailHondaFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/detail-honda.html');
+        return file_get_contents(__DIR__ . '/Fixtures/detail-honda.html');
     }
 
     private function offersFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/offers.html');
+        return file_get_contents(__DIR__ . '/Fixtures/offers.html');
     }
 
     private function resultsPaginationFixture(): string
     {
-        return file_get_contents(__DIR__.'/Fixtures/results-pagination.html');
+        return file_get_contents(__DIR__ . '/Fixtures/results-pagination.html');
     }
 
     public function test_get_brands_parses_brand_options(): void
@@ -1113,7 +1113,7 @@ class MotorOccasionTest extends TestCase
 
     public function test_reset_session_invalidates_external_cache(): void
     {
-        $cache = new ArrayCache;
+        $cache = new ArrayCache();
 
         $mock = new MockHandler([
             $this->sessionResponse(),
@@ -1139,7 +1139,7 @@ class MotorOccasionTest extends TestCase
 
     public function test_search_does_not_invalidate_external_cache(): void
     {
-        $cache = new ArrayCache;
+        $cache = new ArrayCache();
 
         $brand = new Brand(name: 'BMW', value: 'bmw');
 
@@ -1691,7 +1691,7 @@ class MotorOccasionTest extends TestCase
             new Brand(name: 'Cached Honda', value: 'honda'),
         ];
 
-        $cache = new ArrayCache;
+        $cache = new ArrayCache();
         $cache->set('motoroccasion:brands', $cachedBrands);
 
         // No HTTP responses queued — if cache misses, it would fail
@@ -1711,7 +1711,7 @@ class MotorOccasionTest extends TestCase
 
     public function test_get_brands_stores_result_in_cache(): void
     {
-        $cache = new ArrayCache;
+        $cache = new ArrayCache();
 
         $mock = new MockHandler([
             $this->sessionResponse(),
@@ -1741,7 +1741,7 @@ class MotorOccasionTest extends TestCase
             new Category(name: 'Cached Naked', value: '43'),
         ];
 
-        $cache = new ArrayCache;
+        $cache = new ArrayCache();
         $cache->set('motoroccasion:categories', $cachedCategories);
 
         $mock = new MockHandler([]);
@@ -1759,7 +1759,7 @@ class MotorOccasionTest extends TestCase
 
     public function test_get_categories_stores_result_in_cache(): void
     {
-        $cache = new ArrayCache;
+        $cache = new ArrayCache();
 
         $mock = new MockHandler([
             $this->sessionResponse(),
@@ -1951,7 +1951,7 @@ class MotorOccasionTest extends TestCase
 
     public function test_search_criteria_default_sort_order_is_null(): void
     {
-        $criteria = new SearchCriteria;
+        $criteria = new SearchCriteria();
 
         $this->assertNull($criteria->sortOrder);
     }
@@ -2095,7 +2095,7 @@ class MotorOccasionTest extends TestCase
         $httpClient = $this->createClientWithMock($mock);
 
         $client = new MotorOccasion(httpClient: $httpClient);
-        $searchResult = $client->search(new SearchCriteria);
+        $searchResult = $client->search(new SearchCriteria());
 
         $this->assertCount(0, $searchResult->results);
         $this->assertSame(0, $searchResult->totalCount);

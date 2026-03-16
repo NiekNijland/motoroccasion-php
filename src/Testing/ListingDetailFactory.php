@@ -16,8 +16,8 @@ use NiekNijland\MotorOccasion\Data\Seller;
 class ListingDetailFactory
 {
     /**
-     * @param  string[]  $images
-     * @param  array<string, string>  $specifications
+     * @param string[] $images
+     * @param array<string, string> $specifications
      */
     public static function make(
         string $brand = 'BMW',
@@ -79,9 +79,9 @@ class ListingDetailFactory
             ],
             url: $url,
             seller: $seller ?? SellerFactory::makeDealer(),
-            engine: $engine ?? new Engine,
-            chassis: $chassis ?? new Chassis,
-            dimensions: $dimensions ?? new Dimensions,
+            engine: $engine ?? new Engine(),
+            chassis: $chassis ?? new Chassis(),
+            dimensions: $dimensions ?? new Dimensions(),
             id: $id,
             vatDeductible: $vatDeductible,
             licensePlate: $licensePlate,

@@ -2,6 +2,10 @@
 
 All notable changes to `motoroccasion-php` will be documented in this file.
 
+## v1.0.1 - 2026-03-16
+
+Handle split between new, unknown milage and milage known.
+
 ## v1.0.0 - 2026-03-01
 
 No changes. mark as stable.
@@ -11,24 +15,34 @@ No changes. mark as stable.
 ### Added
 
 - `PriceType` string-backed enum with cases: `Asking`, `OnRequest`, `Negotiable`, `Bidding`
+  
   - `Asking` — regular asking price (e.g. `€ 12.500,-`)
   - `OnRequest` — "prijs op aanvraag" / no price available
   - `Negotiable` — "n.o.t.k." / "nader overeen te komen"
   - `Bidding` — "bieden" / "bieding"
   
 - `priceType` field on `Result` and `ListingDetail` DTOs
+  
 - `Engine`, `Chassis`, and `Dimensions` sub-DTOs to group technical specifications on `ListingDetail`
+  
   - `Engine` (16 fields): `capacityCc`, `type`, `cylinders`, `valves`, `boreAndStroke`, `compressionRatio`, `fuelDelivery`, `fuelType`, `isElectric`, `ignition`, `maxTorque`, `clutch`, `gearbox`, `driveType`, `starter`, `topSpeed`
   - `Chassis` (8 fields): `abs`, `frameType`, `frontSuspension`, `rearSuspension`, `frontBrake`, `rearBrake`, `frontTire`, `rearTire`
   - `Dimensions` (7 fields): `seatHeightMm`, `wheelbaseMm`, `lengthMm`, `widthMm`, `heightMm`, `tankCapacityLiters`, `weightKg`
   
 - `EngineFactory`, `ChassisFactory`, `DimensionsFactory` testing utilities
+  
 - New `postalCode` field on `Seller` DTO, extracted from JavaScript variables on the page (authoritative source)
+  
 - Description key-value pairs are now parsed into the `specifications` array when the `deta-tech` table is empty
+  
 - Label synonym mapping for robust matching of Dutch/English specification keys (50+ synonyms)
+  
 - HTML5 named entity decoding for tech table values (`&period;`, `&comma;`, `&colon;`, `&sol;`, `&NewLine;`, etc.)
+  
 - Tech table keys are now normalized through the label synonym map (e.g. `Cilinder inhoud` -> `Cilinderinhoud`)
+  
 - Tech table and description specs are merged for field extraction (description values take precedence)
+  
 
 ### Changed
 

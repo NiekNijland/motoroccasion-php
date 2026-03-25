@@ -26,6 +26,7 @@ use NiekNijland\MotorOccasion\Data\SortOrder;
 use NiekNijland\MotorOccasion\Data\Type;
 use NiekNijland\MotorOccasion\Exception\ClientException;
 use NiekNijland\MotorOccasion\Exception\MotorOccasionException;
+use NiekNijland\MotorOccasion\Exception\SearchFormNotFoundException;
 use NiekNijland\MotorOccasion\Exception\ServerException;
 use NiekNijland\MotorOccasion\MotorOccasion;
 use NiekNijland\MotorOccasion\MotorOccasionInterface;
@@ -1021,11 +1022,26 @@ class MotorOccasionTest extends TestCase
         }
     }
 
-    public function test_search_form_client_error_throws_client_exception(): void
+    public function test_search_form_404_throws_search_form_not_found_exception(): void
     {
         $mock = new MockHandler([
             $this->sessionResponse(),
             new Response(404, [], 'Not Found'),
+        ]);
+
+        $client = new MotorOccasion($this->createClientWithMock($mock));
+
+        $this->expectException(SearchFormNotFoundException::class);
+        $this->expectExceptionMessage('HTTP request failed while fetching search form');
+
+        $client->getBrands();
+    }
+
+    public function test_search_form_other_client_error_throws_client_exception(): void
+    {
+        $mock = new MockHandler([
+            $this->sessionResponse(),
+            new Response(403, [], 'Forbidden'),
         ]);
 
         $client = new MotorOccasion($this->createClientWithMock($mock));

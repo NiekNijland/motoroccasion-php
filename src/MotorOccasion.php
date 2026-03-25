@@ -24,6 +24,7 @@ use NiekNijland\MotorOccasion\Data\SortOrder;
 use NiekNijland\MotorOccasion\Data\Type;
 use NiekNijland\MotorOccasion\Exception\ClientException;
 use NiekNijland\MotorOccasion\Exception\MotorOccasionException;
+use NiekNijland\MotorOccasion\Exception\SearchFormNotFoundException;
 use NiekNijland\MotorOccasion\Exception\ServerException;
 use NiekNijland\MotorOccasion\Parser\HtmlParser;
 use Psr\SimpleCache\CacheInterface;
@@ -486,7 +487,19 @@ class MotorOccasion implements MotorOccasionInterface
                 'query' => ['s' => 'mz'],
             ]);
         } catch (GuzzleException $guzzleException) {
+            if ($guzzleException instanceof GuzzleClientException && (int) $guzzleException->getCode() === 404) {
+                throw new SearchFormNotFoundException(
+                    'HTTP request failed while fetching search form: ' . $guzzleException->getMessage(),
+                    $guzzleException->getCode(),
+                    previous: $guzzleException,
+                );
+            }
+
             throw $this->wrapGuzzleException('HTTP request failed while fetching search form', $guzzleException);
+        }
+
+        if ($response->getStatusCode() === 404) {
+            throw new SearchFormNotFoundException('Could not fetch search form (HTTP 404)', 404);
         }
 
         if ($response->getStatusCode() !== 200) {

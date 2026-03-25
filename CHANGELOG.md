@@ -2,6 +2,16 @@
 
 All notable changes to `motoroccasion-php` will be documented in this file.
 
+## v1.1.1 - 2026-03-25
+
+### Added
+
+- `SearchFormNotFoundException` for the specific case where MotorOccasion's search form endpoint returns a 404.
+
+### Changed
+
+- Search form 404s no longer throw the generic `ClientException`; they now throw `SearchFormNotFoundException`, which still extends `ClientException` and `MotorOccasionException`.
+
 ## v1.1.0 - 2026-03-25
 
 ### Added

@@ -24,7 +24,9 @@ use NiekNijland\MotorOccasion\Data\SearchResult;
 use NiekNijland\MotorOccasion\Data\Seller;
 use NiekNijland\MotorOccasion\Data\SortOrder;
 use NiekNijland\MotorOccasion\Data\Type;
+use NiekNijland\MotorOccasion\Exception\ClientException;
 use NiekNijland\MotorOccasion\Exception\MotorOccasionException;
+use NiekNijland\MotorOccasion\Exception\ServerException;
 use NiekNijland\MotorOccasion\MotorOccasion;
 use NiekNijland\MotorOccasion\MotorOccasionInterface;
 use PHPUnit\Framework\TestCase;
@@ -1016,6 +1018,53 @@ class MotorOccasionTest extends TestCase
             $this->fail('Expected MotorOccasionException was not thrown');
         } catch (MotorOccasionException $motorOccasionException) {
             $this->assertSame($originalException, $motorOccasionException->getPrevious());
+        }
+    }
+
+    public function test_search_form_client_error_throws_client_exception(): void
+    {
+        $mock = new MockHandler([
+            $this->sessionResponse(),
+            new Response(404, [], 'Not Found'),
+        ]);
+
+        $client = new MotorOccasion($this->createClientWithMock($mock));
+
+        $this->expectException(ClientException::class);
+        $this->expectExceptionMessage('HTTP request failed while fetching search form');
+
+        $client->getBrands();
+    }
+
+    public function test_search_form_server_error_throws_server_exception(): void
+    {
+        $mock = new MockHandler([
+            $this->sessionResponse(),
+            new Response(500, [], 'Internal Server Error'),
+        ]);
+
+        $client = new MotorOccasion($this->createClientWithMock($mock));
+
+        $this->expectException(ServerException::class);
+        $this->expectExceptionMessage('HTTP request failed while fetching search form');
+
+        $client->getBrands();
+    }
+
+    public function test_network_error_throws_generic_motor_occasion_exception(): void
+    {
+        $mock = new MockHandler([
+            new ConnectException('DNS failure', new Request('GET', 'https://www.motoroccasion.nl')),
+        ]);
+
+        $client = new MotorOccasion($this->createClientWithMock($mock));
+
+        try {
+            $client->getBrands();
+            $this->fail('Expected MotorOccasionException was not thrown');
+        } catch (MotorOccasionException $e) {
+            $this->assertNotInstanceOf(ClientException::class, $e);
+            $this->assertNotInstanceOf(ServerException::class, $e);
         }
     }
 

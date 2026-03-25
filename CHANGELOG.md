@@ -2,6 +2,15 @@
 
 All notable changes to `motoroccasion-php` will be documented in this file.
 
+## v1.1.0 - 2026-03-25
+
+### Added
+
+- `ClientException` — thrown when the remote server returns a 4xx HTTP response.
+- `ServerException` — thrown when the remote server returns a 5xx HTTP response.
+
+Both extend `MotorOccasionException`, so existing catch blocks are unaffected. Consumers can now catch the specific subclass to handle transient client errors (e.g. 404 from motoroccasion.nl) separately from server failures.
+
 ## v1.0.1 - 2026-03-16
 
 Handle split between new, unknown milage and milage known.

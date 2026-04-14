@@ -2,6 +2,12 @@
 
 All notable changes to `motoroccasion-php` will be documented in this file.
 
+## v1.3.0 - 2026-04-14
+
+### Changed
+
+- Search criteria parameters are now batched into a single HTTP request instead of sending one request per filter criterion. This reduces the number of round-trips and produces a less fingerprint-able request pattern.
+
 ## v1.2.0 - 2026-04-14
 
 ### What's Changed

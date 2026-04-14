@@ -1078,9 +1078,9 @@ class MotorOccasionTest extends TestCase
         try {
             $client->getBrands();
             $this->fail('Expected MotorOccasionException was not thrown');
-        } catch (MotorOccasionException $e) {
-            $this->assertNotInstanceOf(ClientException::class, $e);
-            $this->assertNotInstanceOf(ServerException::class, $e);
+        } catch (MotorOccasionException $motorOccasionException) {
+            $this->assertNotInstanceOf(ClientException::class, $motorOccasionException);
+            $this->assertNotInstanceOf(ServerException::class, $motorOccasionException);
         }
     }
 

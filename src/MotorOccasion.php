@@ -6,12 +6,9 @@ namespace NiekNijland\MotorOccasion;
 
 use Closure;
 use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\SetCookie;
-use GuzzleHttp\Exception\ClientException as GuzzleClientException;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\ServerException as GuzzleServerException;
+use GuzzleHttp\Psr7\Request;
 use JsonException;
 use NiekNijland\MotorOccasion\Data\Brand;
 use NiekNijland\MotorOccasion\Data\Category;
@@ -27,6 +24,9 @@ use NiekNijland\MotorOccasion\Exception\MotorOccasionException;
 use NiekNijland\MotorOccasion\Exception\SearchFormNotFoundException;
 use NiekNijland\MotorOccasion\Exception\ServerException;
 use NiekNijland\MotorOccasion\Parser\HtmlParser;
+use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\CacheInterface;
 
 class MotorOccasion implements MotorOccasionInterface
@@ -43,19 +43,19 @@ class MotorOccasion implements MotorOccasionInterface
     private readonly HtmlParser $parser;
 
     /**
-     * @param ClientInterface $httpClient HTTP client for making requests
-     * @param CacheInterface|null $cache Optional PSR-16 cache for brands and categories
-     * @param int $cacheTtl Cache TTL in seconds (default: 1 hour)
-     * @param (Closure(): int)|null $clock Optional clock function returning a Unix timestamp, used instead of time()
+     * @param  ClientInterface  $httpClient  PSR-18 HTTP client for making requests
+     * @param  CacheInterface|null  $cache  Optional PSR-16 cache for brands and categories
+     * @param  int  $cacheTtl  Cache TTL in seconds (default: 1 hour)
+     * @param  (Closure(): int)|null  $clock  Optional clock function returning a Unix timestamp, used instead of time()
      */
     public function __construct(
-        private readonly ClientInterface $httpClient = new Client(),
+        private readonly ClientInterface $httpClient = new Client,
         private readonly ?CacheInterface $cache = null,
         private readonly int $cacheTtl = 3600,
         private readonly ?Closure $clock = null,
     ) {
-        $this->cookieJar = new CookieJar();
-        $this->parser = new HtmlParser();
+        $this->cookieJar = new CookieJar;
+        $this->parser = new HtmlParser;
     }
 
     /**
@@ -79,7 +79,7 @@ class MotorOccasion implements MotorOccasionInterface
         try {
             $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $jsonException) {
-            throw new MotorOccasionException('Failed to decode brands response: ' . $jsonException->getMessage(), $jsonException->getCode(), previous: $jsonException);
+            throw new MotorOccasionException('Failed to decode brands response: '.$jsonException->getMessage(), $jsonException->getCode(), previous: $jsonException);
         }
 
         if (! isset($data['brands']) || ! is_string($data['brands'])) {
@@ -113,7 +113,7 @@ class MotorOccasion implements MotorOccasionInterface
         try {
             $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $jsonException) {
-            throw new MotorOccasionException('Failed to decode types response: ' . $jsonException->getMessage(), $jsonException->getCode(), previous: $jsonException);
+            throw new MotorOccasionException('Failed to decode types response: '.$jsonException->getMessage(), $jsonException->getCode(), previous: $jsonException);
         }
 
         if (! isset($data['types']) || ! is_string($data['types'])) {
@@ -280,32 +280,54 @@ class MotorOccasion implements MotorOccasionInterface
      */
     private function clearSession(): void
     {
-        $this->cookieJar = new CookieJar();
+        $this->cookieJar = new CookieJar;
         $this->homepageHtml = null;
         $this->categories = null;
     }
 
     /**
-     * @param array<string, string> $query
+     * Send an HTTP request with automatic cookie management.
+     *
+     * @param  array<string, string>  $headers
+     * @param  array<string, string>  $query
+     *
+     * @throws ClientExceptionInterface
+     */
+    private function send(string $method, string $uri, array $headers = [], array $query = []): ResponseInterface
+    {
+        if ($query !== []) {
+            $uri .= '?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        }
+
+        $request = new Request($method, $uri, $headers);
+        $request = $this->cookieJar->withCookieHeader($request);
+
+        $response = $this->httpClient->sendRequest($request);
+
+        $this->cookieJar->extractCookies($request, $response);
+
+        return $response;
+    }
+
+    /**
+     * @param  array<string, string>  $query
      *
      * @throws MotorOccasionException
      */
     private function fetchAjaxResults(string $endpoint, array $query): string
     {
+        $context = 'HTTP request failed for '.$endpoint;
+
         try {
-            $response = $this->httpClient->request('GET', self::BASE_URL . $endpoint, [
-                'cookies' => $this->cookieJar,
-                'query' => $query,
-                'headers' => [
-                    'X-Requested-With' => 'XMLHttpRequest',
-                ],
-            ]);
-        } catch (GuzzleException $guzzleException) {
-            throw $this->wrapGuzzleException('HTTP request failed for ' . $endpoint, $guzzleException);
+            $response = $this->send('GET', self::BASE_URL.$endpoint, [
+                'X-Requested-With' => 'XMLHttpRequest',
+            ], $query);
+        } catch (ClientExceptionInterface $e) {
+            throw new MotorOccasionException($context.': '.$e->getMessage(), $e->getCode(), previous: $e);
         }
 
         if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not fetch AJAX results from ' . $endpoint . ' (HTTP ' . $response->getStatusCode() . ')');
+            throw $this->exceptionForStatus($response->getStatusCode(), $context);
         }
 
         return $response->getBody()->getContents();
@@ -320,16 +342,16 @@ class MotorOccasion implements MotorOccasionInterface
     {
         $this->ensureSession();
 
+        $context = 'HTTP request failed for detail page';
+
         try {
-            $response = $this->httpClient->request('GET', $result->url, [
-                'cookies' => $this->cookieJar,
-            ]);
-        } catch (GuzzleException $guzzleException) {
-            throw $this->wrapGuzzleException('HTTP request failed for detail page', $guzzleException);
+            $response = $this->send('GET', $result->url);
+        } catch (ClientExceptionInterface $e) {
+            throw new MotorOccasionException($context.': '.$e->getMessage(), $e->getCode(), previous: $e);
         }
 
         if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not fetch detail page (HTTP ' . $response->getStatusCode() . ')');
+            throw $this->exceptionForStatus($response->getStatusCode(), $context);
         }
 
         return $response->getBody()->getContents();
@@ -344,16 +366,16 @@ class MotorOccasion implements MotorOccasionInterface
             return;
         }
 
+        $context = 'HTTP request failed while establishing session';
+
         try {
-            $response = $this->httpClient->request('GET', self::BASE_URL, [
-                'cookies' => $this->cookieJar,
-            ]);
-        } catch (GuzzleException $guzzleException) {
-            throw $this->wrapGuzzleException('HTTP request failed while establishing session', $guzzleException);
+            $response = $this->send('GET', self::BASE_URL);
+        } catch (ClientExceptionInterface $e) {
+            throw new MotorOccasionException($context.': '.$e->getMessage(), $e->getCode(), previous: $e);
         }
 
         if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not retrieve session from motoroccasion.nl (HTTP ' . $response->getStatusCode() . ')');
+            throw $this->exceptionForStatus($response->getStatusCode(), $context);
         }
 
         $this->homepageHtml = $response->getBody()->getContents();
@@ -459,20 +481,19 @@ class MotorOccasion implements MotorOccasionInterface
      */
     private function setSessionParam(string $key, string $value): void
     {
+        $context = 'HTTP request failed while setting search parameter '.$key;
+
         try {
-            $response = $this->httpClient->request('GET', self::BASE_URL . '/mz.php', [
-                'cookies' => $this->cookieJar,
-                'query' => [
-                    'params[' . $key . ']' => $value,
-                    'params[a]' => 'check',
-                ],
+            $response = $this->send('GET', self::BASE_URL.'/mz.php', [], [
+                'params['.$key.']' => $value,
+                'params[a]' => 'check',
             ]);
-        } catch (GuzzleException $guzzleException) {
-            throw $this->wrapGuzzleException('HTTP request failed while setting search parameter ' . $key, $guzzleException);
+        } catch (ClientExceptionInterface $e) {
+            throw new MotorOccasionException($context.': '.$e->getMessage(), $e->getCode(), previous: $e);
         }
 
         if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not set search parameter: ' . $key . ' (HTTP ' . $response->getStatusCode() . ')');
+            throw $this->exceptionForStatus($response->getStatusCode(), $context);
         }
     }
 
@@ -481,29 +502,22 @@ class MotorOccasion implements MotorOccasionInterface
      */
     private function fetchSearchForm(): string
     {
+        $context = 'HTTP request failed while fetching search form';
+
         try {
-            $response = $this->httpClient->request('GET', self::BASE_URL . '/fs.php', [
-                'cookies' => $this->cookieJar,
-                'query' => ['s' => 'mz'],
-            ]);
-        } catch (GuzzleException $guzzleException) {
-            if ($guzzleException instanceof GuzzleClientException && (int) $guzzleException->getCode() === 404) {
-                throw new SearchFormNotFoundException(
-                    'HTTP request failed while fetching search form: ' . $guzzleException->getMessage(),
-                    $guzzleException->getCode(),
-                    previous: $guzzleException,
-                );
-            }
-
-            throw $this->wrapGuzzleException('HTTP request failed while fetching search form', $guzzleException);
+            $response = $this->send('GET', self::BASE_URL.'/fs.php', [], ['s' => 'mz']);
+        } catch (ClientExceptionInterface $e) {
+            throw new MotorOccasionException($context.': '.$e->getMessage(), $e->getCode(), previous: $e);
         }
 
-        if ($response->getStatusCode() === 404) {
-            throw new SearchFormNotFoundException('Could not fetch search form (HTTP 404)', 404);
+        $status = $response->getStatusCode();
+
+        if ($status === 404) {
+            throw new SearchFormNotFoundException($context.' (HTTP 404)', 404);
         }
 
-        if ($response->getStatusCode() !== 200) {
-            throw new MotorOccasionException('Could not fetch search form (HTTP ' . $response->getStatusCode() . ')');
+        if ($status !== 200) {
+            throw $this->exceptionForStatus($status, $context);
         }
 
         return $response->getBody()->getContents();
@@ -518,18 +532,18 @@ class MotorOccasion implements MotorOccasionInterface
         return time();
     }
 
-    private function wrapGuzzleException(string $message, GuzzleException $guzzleException): MotorOccasionException
+    private function exceptionForStatus(int $statusCode, string $message): MotorOccasionException
     {
-        $full = $message . ': ' . $guzzleException->getMessage();
+        $fullMessage = $message.' (HTTP '.$statusCode.')';
 
-        if ($guzzleException instanceof GuzzleClientException) {
-            return new ClientException($full, $guzzleException->getCode(), previous: $guzzleException);
+        if ($statusCode >= 400 && $statusCode < 500) {
+            return new ClientException($fullMessage, $statusCode);
         }
 
-        if ($guzzleException instanceof GuzzleServerException) {
-            return new ServerException($full, $guzzleException->getCode(), previous: $guzzleException);
+        if ($statusCode >= 500) {
+            return new ServerException($fullMessage, $statusCode);
         }
 
-        return new MotorOccasionException($full, $guzzleException->getCode(), previous: $guzzleException);
+        return new MotorOccasionException($fullMessage, $statusCode);
     }
 }

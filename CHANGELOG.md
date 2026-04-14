@@ -2,6 +2,17 @@
 
 All notable changes to `motoroccasion-php` will be documented in this file.
 
+## v1.2.0 - 2026-04-14
+
+### What's Changed
+
+- Accept `Psr\Http\Client\ClientInterface` (PSR-18) instead of `GuzzleHttp\ClientInterface` in the constructor, allowing any PSR-18 compliant HTTP client to be injected
+- Cookie management is now handled explicitly via `CookieJar::withCookieHeader()` / `extractCookies()` instead of relying on Guzzle middleware
+- HTTP requests are built as PSR-7 `Request` objects and sent through `sendRequest()`
+- Added `psr/http-client` as an explicit dependency
+
+**Note:** Existing code passing a `GuzzleHttp\Client` instance continues to work without changes, as Guzzle's Client implements `Psr\Http\Client\ClientInterface`.
+
 ## v1.1.1 - 2026-03-25
 
 ### Added

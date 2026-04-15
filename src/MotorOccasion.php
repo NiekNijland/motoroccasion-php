@@ -43,19 +43,19 @@ class MotorOccasion implements MotorOccasionInterface
     private readonly HtmlParser $parser;
 
     /**
-     * @param  ClientInterface  $httpClient  PSR-18 HTTP client for making requests
-     * @param  CacheInterface|null  $cache  Optional PSR-16 cache for brands and categories
-     * @param  int  $cacheTtl  Cache TTL in seconds (default: 1 hour)
-     * @param  (Closure(): int)|null  $clock  Optional clock function returning a Unix timestamp, used instead of time()
+     * @param ClientInterface $httpClient PSR-18 HTTP client for making requests
+     * @param CacheInterface|null $cache Optional PSR-16 cache for brands and categories
+     * @param int $cacheTtl Cache TTL in seconds (default: 1 hour)
+     * @param (Closure(): int)|null $clock Optional clock function returning a Unix timestamp, used instead of time()
      */
     public function __construct(
-        private readonly ClientInterface $httpClient = new Client,
+        private readonly ClientInterface $httpClient = new Client(),
         private readonly ?CacheInterface $cache = null,
         private readonly int $cacheTtl = 3600,
         private readonly ?Closure $clock = null,
     ) {
-        $this->cookieJar = new CookieJar;
-        $this->parser = new HtmlParser;
+        $this->cookieJar = new CookieJar();
+        $this->parser = new HtmlParser();
     }
 
     /**
@@ -79,7 +79,7 @@ class MotorOccasion implements MotorOccasionInterface
         try {
             $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $jsonException) {
-            throw new MotorOccasionException('Failed to decode brands response: '.$jsonException->getMessage(), $jsonException->getCode(), previous: $jsonException);
+            throw new MotorOccasionException('Failed to decode brands response: ' . $jsonException->getMessage(), $jsonException->getCode(), previous: $jsonException);
         }
 
         if (! isset($data['brands']) || ! is_string($data['brands'])) {
@@ -113,7 +113,7 @@ class MotorOccasion implements MotorOccasionInterface
         try {
             $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $jsonException) {
-            throw new MotorOccasionException('Failed to decode types response: '.$jsonException->getMessage(), $jsonException->getCode(), previous: $jsonException);
+            throw new MotorOccasionException('Failed to decode types response: ' . $jsonException->getMessage(), $jsonException->getCode(), previous: $jsonException);
         }
 
         if (! isset($data['types']) || ! is_string($data['types'])) {
@@ -280,7 +280,7 @@ class MotorOccasion implements MotorOccasionInterface
      */
     private function clearSession(): void
     {
-        $this->cookieJar = new CookieJar;
+        $this->cookieJar = new CookieJar();
         $this->homepageHtml = null;
         $this->categories = null;
     }
@@ -288,15 +288,15 @@ class MotorOccasion implements MotorOccasionInterface
     /**
      * Send an HTTP request with automatic cookie management.
      *
-     * @param  array<string, string>  $headers
-     * @param  array<string, string>  $query
+     * @param array<string, string> $headers
+     * @param array<string, string> $query
      *
      * @throws ClientExceptionInterface
      */
     private function send(string $method, string $uri, array $headers = [], array $query = []): ResponseInterface
     {
         if ($query !== []) {
-            $uri .= '?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+            $uri .= '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
         }
 
         $request = new Request($method, $uri, $headers);
@@ -310,20 +310,20 @@ class MotorOccasion implements MotorOccasionInterface
     }
 
     /**
-     * @param  array<string, string>  $query
+     * @param array<string, string> $query
      *
      * @throws MotorOccasionException
      */
     private function fetchAjaxResults(string $endpoint, array $query): string
     {
-        $context = 'HTTP request failed for '.$endpoint;
+        $context = 'HTTP request failed for ' . $endpoint;
 
         try {
-            $response = $this->send('GET', self::BASE_URL.$endpoint, [
+            $response = $this->send('GET', self::BASE_URL . $endpoint, [
                 'X-Requested-With' => 'XMLHttpRequest',
             ], $query);
         } catch (ClientExceptionInterface $clientException) {
-            throw new MotorOccasionException($context.': '.$clientException->getMessage(), $clientException->getCode(), previous: $clientException);
+            throw new MotorOccasionException($context . ': ' . $clientException->getMessage(), $clientException->getCode(), previous: $clientException);
         }
 
         if ($response->getStatusCode() !== 200) {
@@ -347,7 +347,7 @@ class MotorOccasion implements MotorOccasionInterface
         try {
             $response = $this->send('GET', $result->url);
         } catch (ClientExceptionInterface $clientException) {
-            throw new MotorOccasionException($context.': '.$clientException->getMessage(), $clientException->getCode(), previous: $clientException);
+            throw new MotorOccasionException($context . ': ' . $clientException->getMessage(), $clientException->getCode(), previous: $clientException);
         }
 
         if ($response->getStatusCode() !== 200) {
@@ -371,7 +371,7 @@ class MotorOccasion implements MotorOccasionInterface
         try {
             $response = $this->send('GET', self::BASE_URL);
         } catch (ClientExceptionInterface $clientException) {
-            throw new MotorOccasionException($context.': '.$clientException->getMessage(), $clientException->getCode(), previous: $clientException);
+            throw new MotorOccasionException($context . ': ' . $clientException->getMessage(), $clientException->getCode(), previous: $clientException);
         }
 
         if ($response->getStatusCode() !== 200) {
@@ -479,17 +479,17 @@ class MotorOccasion implements MotorOccasionInterface
      */
     private function setSessionParam(string $key, string $value): void
     {
-        $context = 'HTTP request failed while setting search parameter '.$key;
+        $context = 'HTTP request failed while setting search parameter ' . $key;
 
         try {
-            $response = $this->send('GET', self::BASE_URL.'/mz.php', [
+            $response = $this->send('GET', self::BASE_URL . '/mz.php', [
                 'X-Requested-With' => 'XMLHttpRequest',
             ], [
-                'params['.$key.']' => $value,
+                'params[' . $key . ']' => $value,
                 'params[a]' => 'check',
             ]);
         } catch (ClientExceptionInterface $clientException) {
-            throw new MotorOccasionException($context.': '.$clientException->getMessage(), $clientException->getCode(), previous: $clientException);
+            throw new MotorOccasionException($context . ': ' . $clientException->getMessage(), $clientException->getCode(), previous: $clientException);
         }
 
         if ($response->getStatusCode() !== 200) {
@@ -503,7 +503,7 @@ class MotorOccasion implements MotorOccasionInterface
      * Reduces the number of HTTP round-trips compared to calling
      * setSessionParam() individually for each filter criterion.
      *
-     * @param  array<string, string>  $params
+     * @param array<string, string> $params
      *
      * @throws MotorOccasionException
      */
@@ -516,17 +516,17 @@ class MotorOccasion implements MotorOccasionInterface
         $query = ['params[a]' => 'check'];
 
         foreach ($params as $key => $value) {
-            $query['params['.$key.']'] = $value;
+            $query['params[' . $key . ']'] = $value;
         }
 
         $context = 'HTTP request failed while setting search parameters';
 
         try {
-            $response = $this->send('GET', self::BASE_URL.'/mz.php', [
+            $response = $this->send('GET', self::BASE_URL . '/mz.php', [
                 'X-Requested-With' => 'XMLHttpRequest',
             ], $query);
         } catch (ClientExceptionInterface $clientException) {
-            throw new MotorOccasionException($context.': '.$clientException->getMessage(), $clientException->getCode(), previous: $clientException);
+            throw new MotorOccasionException($context . ': ' . $clientException->getMessage(), $clientException->getCode(), previous: $clientException);
         }
 
         if ($response->getStatusCode() !== 200) {
@@ -542,15 +542,15 @@ class MotorOccasion implements MotorOccasionInterface
         $context = 'HTTP request failed while fetching search form';
 
         try {
-            $response = $this->send('GET', self::BASE_URL.'/fs.php', [], ['s' => 'mz']);
+            $response = $this->send('GET', self::BASE_URL . '/fs.php', [], ['s' => 'mz']);
         } catch (ClientExceptionInterface $clientException) {
-            throw new MotorOccasionException($context.': '.$clientException->getMessage(), $clientException->getCode(), previous: $clientException);
+            throw new MotorOccasionException($context . ': ' . $clientException->getMessage(), $clientException->getCode(), previous: $clientException);
         }
 
         $status = $response->getStatusCode();
 
         if ($status === 404) {
-            throw new SearchFormNotFoundException($context.' (HTTP 404)', 404);
+            throw new SearchFormNotFoundException($context . ' (HTTP 404)', 404);
         }
 
         if ($status !== 200) {
@@ -571,7 +571,7 @@ class MotorOccasion implements MotorOccasionInterface
 
     private function exceptionForStatus(int $statusCode, string $message): MotorOccasionException
     {
-        $fullMessage = $message.' (HTTP '.$statusCode.')';
+        $fullMessage = $message . ' (HTTP ' . $statusCode . ')';
 
         if ($statusCode >= 400 && $statusCode < 500) {
             return new ClientException($fullMessage, $statusCode);

@@ -2,6 +2,12 @@
 
 All notable changes to `motoroccasion-php` will be documented in this file.
 
+## v1.3.1 - 2026-04-15
+
+### Fixed
+
+- `setSessionParam()` and `setSessionParams()` now send `X-Requested-With: XMLHttpRequest` on their `/mz.php` requests. MotorOccasion treats `/mz.php` as an AJAX endpoint and started returning HTTP 404 for requests without the header, breaking `search()` and `getTypesForBrand()`.
+
 ## v1.3.0 - 2026-04-14
 
 ### Changed
